@@ -1,5 +1,5 @@
 module.exports = {
     development: {
-        src: ['<%= srcLocation %>/**/*.js']
+        target: ['<%= srcLocation %>/**/*.js']
     }
 };
