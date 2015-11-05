@@ -1,0 +1,22 @@
+{
+  "name": "stomp-with-sockjs",
+  "description": "Stomp client for Web browsers using SockJS. Ripped off from jmesnil/stomp-websocket to use with SockJS and customization for event based API.",
+  "main": "src/index.js",
+  "authors": [
+    "Tanmay Patel (me@tanmaypatel.com)"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/tanmaypatel/stomp-with-sockjs",
+  "moduleType": [
+    "amd",
+    "es6"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

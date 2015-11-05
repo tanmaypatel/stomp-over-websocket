@@ -1,0 +1,30 @@
+{
+  "name": "stomp-with-sockjs",
+  "version": "0.1.0",
+  "description": "Stomp client for Web browsers using SockJS. Ripped off from jmesnil/stomp-websocket to use with SockJS and customization for event based API.",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanmaypatel/stomp-with-sockjs.git"
+  },
+  "author": "Tanmay Patel (me@tanmaypatel.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tanmaypatel/stomp-with-sockjs/issues"
+  },
+  "homepage": "https://github.com/tanmaypatel/stomp-with-sockjs#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.0.15",
+    "grunt": "^0.4.5",
+    "grunt-babel": "^6.0.0",
+    "grunt-contrib-eslint": "0.0.5",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-newer": "^1.1.1",
+    "load-grunt-config": "^0.19.0",
+    "load-grunt-tasks": "^3.3.0",
+    "time-grunt": "^1.2.2"
+  }
+}
