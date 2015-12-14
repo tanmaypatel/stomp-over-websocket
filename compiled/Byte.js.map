@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/Byte.js"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;0BAKe,IAAI","file":"Byte.js","sourcesContent":["const Byte = {\r\n    LF: '\\x0A',\r\n    NULL: '\\x00'\r\n};\r\n\r\nexport default Byte;\r\n"]}
