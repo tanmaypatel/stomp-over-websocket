@@ -233,6 +233,7 @@ class Client
 
                     case 'MESSAGE':
                         let subscription = frame.headers.subscription;
+
                         let onreceive = this.subscriptions[subscription] || this.onreceive;
 
                         if(onreceive)
@@ -249,6 +250,8 @@ class Client
                             {
                                 return client.nack(messageID, subscription, headers);
                             };
+
+                            onreceive(frame);
                         }
                         else
                         {

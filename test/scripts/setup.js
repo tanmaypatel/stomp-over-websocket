@@ -54,7 +54,8 @@ require([
 		'specs/unit/websocket.spec',
 		'specs/unit/frame.spec',
 		'specs/unit/parse_connect.spec',
-		'specs/unit/connection.spec'
+		'specs/unit/connection.spec',
+		'specs/unit/message.spec'
 	], function()
 	{
 		mocha.run();

@@ -357,6 +357,8 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                                                 var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
                                                 return client.nack(messageID, subscription, headers);
                                             };
+
+                                            onreceive(frame);
                                         })();
                                     } else {
                                         if (typeof _this2.debug === 'function') {
