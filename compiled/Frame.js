@@ -20,11 +20,35 @@ define(['exports', './Byte'], function (exports) {
 
         var _Byte2 = _interopRequireDefault(_Byte);
 
-        function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+        function _interopRequireDefault(obj) {
+            return obj && obj.__esModule ? obj : {
+                default: obj
+            };
+        }
 
-        function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) {
+                throw new TypeError("Cannot call a class as a function");
+            }
+        }
 
-        var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+        var _createClass = (function () {
+            function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                    var descriptor = props[i];
+                    descriptor.enumerable = descriptor.enumerable || false;
+                    descriptor.configurable = true;
+                    if ("value" in descriptor) descriptor.writable = true;
+                    Object.defineProperty(target, descriptor.key, descriptor);
+                }
+            }
+
+            return function (Constructor, protoProps, staticProps) {
+                if (protoProps) defineProperties(Constructor.prototype, protoProps);
+                if (staticProps) defineProperties(Constructor, staticProps);
+                return Constructor;
+            };
+        })();
 
         var unmarshallSingle = function unmarshallSingle(data) {
             var divider = data.search(new RegExp('/' + _Byte2.default.LF + _Byte2.default.LF + '/'));
@@ -103,10 +127,10 @@ define(['exports', './Byte'], function (exports) {
 
                     try {
                         for (var _iterator2 = data.split(new RegExp('/' + _Byte2.default.NULL + _Byte2.default.LF + '/'))[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                            var data = _step2.value;
+                            var _data = _step2.value;
 
-                            if (data.length > 0) {
-                                frames.push(unmarshallSingle(data));
+                            if (_data.length > 0) {
+                                frames.push(unmarshallSingle(_data));
                             }
                         }
                     } catch (err) {
