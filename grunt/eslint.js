@@ -1,5 +1,6 @@
 module.exports = {
-    development: {
-        target: ['<%= srcLocation %>/**/*.js']
-    }
+    options: {
+        configFile: './.eslintrc'
+    },
+    target: ['<%= srcLocation %>/**/*.js']
 };

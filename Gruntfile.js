@@ -9,5 +9,5 @@ module.exports = function(grunt)
         }
 	});
 
-	grunt.registerTask('default', ['babel:development', 'eslint:development']);
+	grunt.registerTask('default', ['babel:development', 'eslint']);
 };

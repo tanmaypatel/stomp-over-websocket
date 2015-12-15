@@ -1,8 +1,7 @@
 module.exports = {
     development: {
         options: {
-            sourceMap: true,
-            presets: ['es2015']
+            sourceMap: true
         },
         files: [{
 			expand: true,

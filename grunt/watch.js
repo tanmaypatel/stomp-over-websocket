@@ -14,6 +14,6 @@ module.exports = {
 			livereload: false
 		},
 		files: ['<%= srcLocation %>/**/*.js'],
-		tasks: ['newer:babel:development', 'newer:eslint:development']
+		tasks: ['newer:babel:development', 'newer:eslint']
 	}
 };
