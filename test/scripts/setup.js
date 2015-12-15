@@ -55,7 +55,8 @@ require([
 		'specs/unit/frame.spec',
 		'specs/unit/parse_connect.spec',
 		'specs/unit/connection.spec',
-		'specs/unit/message.spec'
+		'specs/unit/message.spec',
+		'specs/unit/transaction.spec'
 	], function()
 	{
 		mocha.run();
