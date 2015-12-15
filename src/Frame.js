@@ -2,19 +2,19 @@ import Byte from './Byte';
 
 let unmarshallSingle = (data) =>
 {
-    let divider = data.search(new RegExp(`/${Byte.LF}${Byte.LF}/`));
+    let divider = data.search(new RegExp(`${Byte.LF}${Byte.LF}`));
     let headerLines = data.substring(0, divider).split(Byte.LF);
     let command = headerLines.shift();
     let headers = {};
 
-    trim(str)
+    let trim = function(str)
     {
         return str.replace(/^\s+|\s+$/g, '');
-    }
+    };
 
     for(let line of headerLines.reverse())
     {
-        let inx = line.indexOf(':');
+        let idx = line.indexOf(':');
         headers[trim(line.substring(0, idx))] = trim(line.substring(idx + 1));
     }
 
@@ -64,7 +64,7 @@ class Frame
     {
         let frames = [];
 
-        for(let data of data.split(new RegExp(`/${Byte.NULL}${Byte.LF}/`)))
+        for(let data of datas.split(new RegExp(`${Byte.NULL}${Byte.LF}*`)))
         {
             if(data.length > 0)
             {
@@ -93,13 +93,20 @@ class Frame
     {
         let lines = [this.command];
 
+        let skipContentLength = this.headers['content-length'] === false ? true : false;
+
+        if(skipContentLength)
+        {
+            delete this.headers['content-length'];
+        }
+
         for(let key of Object.keys(this.headers))
         {
             let value = this.headers[key];
             lines.push(`${key}:${value}`);
         }
 
-        if(body)
+        if(this.body && !skipContentLength)
         {
             lines.push(`content-length:${Frame.sizeOfUTF8(this.body)}`);
         }

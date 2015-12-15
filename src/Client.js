@@ -161,9 +161,9 @@ class Client
 
     connect(...args)
     {
-        let out = this._parseConnect(args);
-        let headers, errorCallback;
+        let out = this._parseConnect.apply(this, args);
 
+        let headers, errorCallback;
         [headers, this.connectCallback, errorCallback] = out;
 
         if(typeof this.debug === 'function')
@@ -293,7 +293,7 @@ class Client
                  this.debug(msg);
              }
 
-             this._cleanup();
+             this._cleanUp();
 
              if(typeof errorCallback === 'function')
              {
@@ -321,7 +321,7 @@ class Client
 
         this.ws.onclose = null;
         this.ws.close();
-        this._cleanup();
+        this._cleanUp();
 
         if(typeof disconnectCallback === 'function')
         {

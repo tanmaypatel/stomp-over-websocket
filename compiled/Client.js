@@ -1,568 +1,554 @@
 'use strict';
 
-define(['exports', './Byte', './Frame', './Stomp'], function (exports) {
-    (function (global, factory) {
-        if (typeof define === "function" && define.amd) {
-            define(['exports', './Byte', './Frame', './Stomp'], factory);
-        } else if (typeof exports !== "undefined") {
-            factory(exports);
-        } else {
-            var mod = {
-                exports: {}
-            };
-            factory(mod.exports, global.Byte, global.Frame, global.Stomp);
-            global.Client = mod.exports;
-        }
-    })(this, function (exports, _Byte, _Frame, _Stomp) {
-        Object.defineProperty(exports, "__esModule", {
-            value: true
-        });
+define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _Frame, _Stomp) {
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
 
-        var _Byte2 = _interopRequireDefault(_Byte);
+    var _Byte2 = _interopRequireDefault(_Byte);
 
-        var _Frame2 = _interopRequireDefault(_Frame);
+    var _Frame2 = _interopRequireDefault(_Frame);
 
-        var _Stomp2 = _interopRequireDefault(_Stomp);
+    var _Stomp2 = _interopRequireDefault(_Stomp);
 
-        function _interopRequireDefault(obj) {
-            return obj && obj.__esModule ? obj : {
-                default: obj
-            };
-        }
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
 
-        var _slicedToArray = (function () {
-            function sliceIterator(arr, i) {
-                var _arr = [];
-                var _n = true;
-                var _d = false;
-                var _e = undefined;
+    var _slicedToArray = (function () {
+        function sliceIterator(arr, i) {
+            var _arr = [];
+            var _n = true;
+            var _d = false;
+            var _e = undefined;
 
+            try {
+                for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+                    _arr.push(_s.value);
+
+                    if (i && _arr.length === i) break;
+                }
+            } catch (err) {
+                _d = true;
+                _e = err;
+            } finally {
                 try {
-                    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-                        _arr.push(_s.value);
-
-                        if (i && _arr.length === i) break;
-                    }
-                } catch (err) {
-                    _d = true;
-                    _e = err;
+                    if (!_n && _i["return"]) _i["return"]();
                 } finally {
-                    try {
-                        if (!_n && _i["return"]) _i["return"]();
-                    } finally {
-                        if (_d) throw _e;
-                    }
+                    if (_d) throw _e;
                 }
-
-                return _arr;
             }
 
-            return function (arr, i) {
-                if (Array.isArray(arr)) {
-                    return arr;
-                } else if (Symbol.iterator in Object(arr)) {
-                    return sliceIterator(arr, i);
-                } else {
-                    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-                }
-            };
-        })();
-
-        function _classCallCheck(instance, Constructor) {
-            if (!(instance instanceof Constructor)) {
-                throw new TypeError("Cannot call a class as a function");
-            }
+            return _arr;
         }
 
-        var _createClass = (function () {
-            function defineProperties(target, props) {
-                for (var i = 0; i < props.length; i++) {
-                    var descriptor = props[i];
-                    descriptor.enumerable = descriptor.enumerable || false;
-                    descriptor.configurable = true;
-                    if ("value" in descriptor) descriptor.writable = true;
-                    Object.defineProperty(target, descriptor.key, descriptor);
-                }
-            }
-
-            return function (Constructor, protoProps, staticProps) {
-                if (protoProps) defineProperties(Constructor.prototype, protoProps);
-                if (staticProps) defineProperties(Constructor, staticProps);
-                return Constructor;
-            };
-        })();
-
-        var now = function now() {
-            if (Date.now) {
-                return Date.now();
+        return function (arr, i) {
+            if (Array.isArray(arr)) {
+                return arr;
+            } else if (Symbol.iterator in Object(arr)) {
+                return sliceIterator(arr, i);
             } else {
-                return new Date().valueOf;
+                throw new TypeError("Invalid attempt to destructure non-iterable instance");
             }
         };
+    })();
 
-        var Client = (function () {
-            function Client(ws) {
-                _classCallCheck(this, Client);
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
 
-                this.ws = ws;
-                this.ws.binaryType = 'arraybuffer';
-                this.counter = 0;
-                this.connected = false;
-                this.heartbeat = {
-                    outgoing: 10000,
-                    incoming: 10000
-                };
-                this.maxWebSocketFrameSize = 16 * 1024;
-                this.subscriptions = {};
-                this.partialData = '';
+    var _createClass = (function () {
+        function defineProperties(target, props) {
+            for (var i = 0; i < props.length; i++) {
+                var descriptor = props[i];
+                descriptor.enumerable = descriptor.enumerable || false;
+                descriptor.configurable = true;
+                if ("value" in descriptor) descriptor.writable = true;
+                Object.defineProperty(target, descriptor.key, descriptor);
             }
+        }
 
-            _createClass(Client, [{
-                key: 'debug',
-                value: function debug(message) {
-                    console.log(message);
+        return function (Constructor, protoProps, staticProps) {
+            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+            if (staticProps) defineProperties(Constructor, staticProps);
+            return Constructor;
+        };
+    })();
+
+    var now = function now() {
+        if (Date.now) {
+            return Date.now();
+        } else {
+            return new Date().valueOf;
+        }
+    };
+
+    var Client = (function () {
+        function Client(ws) {
+            _classCallCheck(this, Client);
+
+            this.ws = ws;
+            this.ws.binaryType = 'arraybuffer';
+            this.counter = 0;
+            this.connected = false;
+            this.heartbeat = {
+                outgoing: 10000,
+                incoming: 10000
+            };
+            this.maxWebSocketFrameSize = 16 * 1024;
+            this.subscriptions = {};
+            this.partialData = '';
+        }
+
+        _createClass(Client, [{
+            key: 'debug',
+            value: function debug(message) {
+                console.log(message);
+            }
+        }, {
+            key: '_transmit',
+            value: function _transmit(command, headers, body) {
+                var out = _Frame2.default.marshall(command, headers, body);
+
+                if (typeof this.debug === 'function') {
+                    this.debug('>>> ' + out);
                 }
-            }, {
-                key: '_transmit',
-                value: function _transmit(command, headers, body) {
-                    var out = _Frame2.default.marshall(command, headers, body);
+
+                while (true) {
+                    if (out.length > this.maxWebSocketFrameSize) {
+                        this.ws.send(out.substring(0, this.maxWebSocketFrameSize));
+                        out = out.substring(this.maxWebSocketFrameSize);
+
+                        if (typeof this.debug === 'function') {
+                            this.debug('remaining = ' + out.length);
+                        }
+                    } else {
+                        return this.ws.send(out);
+                    }
+                }
+            }
+        }, {
+            key: '_setupHeartBeat',
+            value: function _setupHeartBeat(headers) {
+                var _this = this;
+
+                if ([_Stomp2.default.VERSIONS.V1_1, _Stomp2.default.VERSIONS.V1_2].indexOf(headers.version) >= 0) {
+                    return;
+                }
+
+                var serverOutgoing = undefined,
+                    serverIncoming = undefined;
+
+                var _headers$heartBeat$s = headers['heart-beat'].split(',').map(function (v) {
+                    return parseInt(v);
+                });
+
+                var _headers$heartBeat$s2 = _slicedToArray(_headers$heartBeat$s, 2);
+
+                serverOutgoing = _headers$heartBeat$s2[0];
+                serverIncoming = _headers$heartBeat$s2[1];
+                var ttl = undefined;
+
+                if (this.heartbeat.outgoing == 0 || serverIncoming == 0) {
+                    ttl = Math.max(this.heartbeat.outgoing, serverIncoming);
 
                     if (typeof this.debug === 'function') {
-                        this.debug('>>> ' + out);
+                        this.debug('send PING every ' + ttl + 'ms');
                     }
 
-                    while (true) {
-                        if (out.length > this.maxWebSocketFrameSize) {
-                            this.ws.send(out.substring(0, this.maxWebSocketFrameSize));
-                            out = out.substring(this.maxWebSocketFrameSize);
+                    this.pinger = _Stomp2.default.setInterval(ttl, function () {
+                        _this.ws.send(_Byte2.default.LF);
 
-                            if (typeof this.debug === 'function') {
-                                this.debug('remaining = ' + out.length);
-                            }
-                        } else {
-                            return this.ws.send(out);
+                        if (typeof _this.debug === 'function') {
+                            _this.debug('>>> PING');
                         }
-                    }
+                    });
                 }
-            }, {
-                key: '_setupHeartBeat',
-                value: function _setupHeartBeat(headers) {
-                    var _this = this;
 
-                    if ([_Stomp2.default.VERSIONS.V1_1, _Stomp2.default.VERSIONS.V1_2].indexOf(headers.version) >= 0) {
+                if (this.heartbeat.incoming == 0 || serverOutgoing == 0) {
+                    ttl = Math.max(this.heartbeat.incoming, serverOutgoing);
+
+                    if (typeof this.debug === 'function') {
+                        this.debug('check PONG every ' + ttl + 'ms');
+                    }
+
+                    this.ponger = _Stomp2.default.setInterval(ttl, function () {
+                        var delta = now() - _this.serverActivity;
+
+                        if (delta > ttl * 2) {
+                            if (typeof _this.debug === 'function') {
+                                _this.debug('did not receive server activity for the last ' + delta + 'ms');
+                            }
+
+                            _this.ws.close();
+                        }
+                    });
+                }
+            }
+        }, {
+            key: '_parseConnect',
+            value: function _parseConnect() {
+                var headers = {};
+                var connectCallback = null;
+                var errorCallback = null;
+
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
+                switch (args.length) {
+                    case 2:
+                        headers = args[0];
+                        connectCallback = args[1];
+                        break;
+
+                    case 3:
+                        if (args[1] instanceof Function) {
+                            headers = args[0];
+                            connectCallback = args[1];
+                            errorCallback = args[2];
+                        } else {
+                            headers.login = args[0];
+                            headers.passcode = args[1];
+                            connectCallback = args[2];
+                        }
+
+                        break;
+
+                    case 4:
+                        headers.login = args[0];
+                        headers.passcode = args[1];
+                        connectCallback = args[2];
+                        errorCallback = args[3];
+                        break;
+
+                    default:
+                        headers.login = args[0];
+                        headers.passcode = args[1];
+                        connectCallback = args[2];
+                        errorCallback = args[3];
+                        headers.host = args[4];
+                        break;
+                }
+
+                return [headers, connectCallback, errorCallback];
+            }
+        }, {
+            key: 'connect',
+            value: function connect() {
+                var _this2 = this;
+
+                for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                    args[_key2] = arguments[_key2];
+                }
+
+                var out = this._parseConnect.apply(this, args);
+
+                var headers = undefined,
+                    errorCallback = undefined;
+
+                var _out = _slicedToArray(out, 3);
+
+                headers = _out[0];
+                this.connectCallback = _out[1];
+                errorCallback = _out[2];
+
+                if (typeof this.debug === 'function') {
+                    this.debug('Opening Web Socket...');
+                }
+
+                this.ws.onmessage = function (evt) {
+                    var data = undefined,
+                        arr = undefined;
+
+                    if (typeof ArrayBuffer != 'undefined' && evt.data instanceof ArrayBuffer) {
+                        var _arr = new Uint8Array(evt.data);
+
+                        if (typeof _this2.debug === 'function') {
+                            _this2.debug('--- got data length: ' + _arr.length);
+                        }
+
+                        var _results = [];
+                        var _iteratorNormalCompletion = true;
+                        var _didIteratorError = false;
+                        var _iteratorError = undefined;
+
+                        try {
+                            for (var _iterator = _arr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                var c = _step.value;
+
+                                _results.push(String.fromCharCode(c));
+                            }
+                        } catch (err) {
+                            _didIteratorError = true;
+                            _iteratorError = err;
+                        } finally {
+                            try {
+                                if (!_iteratorNormalCompletion && _iterator.return) {
+                                    _iterator.return();
+                                }
+                            } finally {
+                                if (_didIteratorError) {
+                                    throw _iteratorError;
+                                }
+                            }
+                        }
+
+                        data = _results.join('');
+                    } else {
+                        data = event.data;
+                    }
+
+                    _this2.serverActivity = now();
+
+                    if (data == _Byte2.default.LF) {
+                        if (typeof _this2.debug === 'function') {
+                            _this2.debug('<<< PONG');
+                        }
+
                         return;
                     }
 
-                    var serverOutgoing = undefined,
-                        serverIncoming = undefined;
-
-                    var _headers$heartBeat$s = headers['heart-beat'].split(',').map(function (v) {
-                        return parseInt(v);
-                    });
-
-                    var _headers$heartBeat$s2 = _slicedToArray(_headers$heartBeat$s, 2);
-
-                    serverOutgoing = _headers$heartBeat$s2[0];
-                    serverIncoming = _headers$heartBeat$s2[1];
-                    var ttl = undefined;
-
-                    if (this.heartbeat.outgoing == 0 || serverIncoming == 0) {
-                        ttl = Math.max(this.heartbeat.outgoing, serverIncoming);
-
-                        if (typeof this.debug === 'function') {
-                            this.debug('send PING every ' + ttl + 'ms');
-                        }
-
-                        this.pinger = _Stomp2.default.setInterval(ttl, function () {
-                            _this.ws.send(_Byte2.default.LF);
-
-                            if (typeof _this.debug === 'function') {
-                                _this.debug('>>> PING');
-                            }
-                        });
+                    if (typeof _this2.debug === 'function') {
+                        _this2.debug('<<< ' + data);
                     }
 
-                    if (this.heartbeat.incoming == 0 || serverOutgoing == 0) {
-                        ttl = Math.max(this.heartbeat.incoming, serverOutgoing);
+                    var results = [];
+                    var _iteratorNormalCompletion2 = true;
+                    var _didIteratorError2 = false;
+                    var _iteratorError2 = undefined;
 
-                        if (typeof this.debug === 'function') {
-                            this.debug('check PONG every ' + ttl + 'ms');
-                        }
+                    try {
+                        for (var _iterator2 = _Frame2.default.unmarshall(data)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                            var frame = _step2.value;
 
-                        this.ponger = _Stomp2.default.setInterval(ttl, function () {
-                            var delta = now() - _this.serverActivity;
-
-                            if (delta > ttl * 2) {
-                                if (typeof _this.debug === 'function') {
-                                    _this.debug('did not receive server activity for the last ' + delta + 'ms');
-                                }
-
-                                _this.ws.close();
-                            }
-                        });
-                    }
-                }
-            }, {
-                key: '_parseConnect',
-                value: function _parseConnect() {
-                    var headers = {};
-                    var connectCallback = null;
-                    var errorCallback = null;
-
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                        args[_key] = arguments[_key];
-                    }
-
-                    switch (args.length) {
-                        case 2:
-                            headers = args[0];
-                            connectCallback = args[1];
-                            break;
-
-                        case 3:
-                            if (args[1] instanceof Function) {
-                                headers = args[0];
-                                connectCallback = args[1];
-                                errorCallback = args[2];
-                            } else {
-                                headers.login = args[0];
-                                headers.passcode = args[1];
-                                connectCallback = args[2];
-                            }
-
-                            break;
-
-                        case 4:
-                            headers.login = args[0];
-                            headers.passcode = args[1];
-                            connectCallback = args[2];
-                            errorCallback = args[3];
-                            break;
-
-                        default:
-                            headers.login = args[0];
-                            headers.passcode = args[1];
-                            connectCallback = args[2];
-                            errorCallback = args[3];
-                            headers.host = args[4];
-                            break;
-                    }
-
-                    return [headers, connectCallback, errorCallback];
-                }
-            }, {
-                key: 'connect',
-                value: function connect() {
-                    var _this2 = this;
-
-                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                        args[_key2] = arguments[_key2];
-                    }
-
-                    var out = this._parseConnect(args);
-
-                    var headers = undefined,
-                        errorCallback = undefined;
-
-                    var _out = _slicedToArray(out, 3);
-
-                    headers = _out[0];
-                    this.connectCallback = _out[1];
-                    errorCallback = _out[2];
-
-                    if (typeof this.debug === 'function') {
-                        this.debug('Opening Web Socket...');
-                    }
-
-                    this.ws.onmessage = function (evt) {
-                        var data = undefined,
-                            arr = undefined;
-
-                        if (typeof ArrayBuffer != 'undefined' && evt.data instanceof ArrayBuffer) {
-                            var _arr = new Uint8Array(evt.data);
-
-                            if (typeof _this2.debug === 'function') {
-                                _this2.debug('--- got data length: ' + _arr.length);
-                            }
-
-                            var _results = [];
-                            var _iteratorNormalCompletion = true;
-                            var _didIteratorError = false;
-                            var _iteratorError = undefined;
-
-                            try {
-                                for (var _iterator = _arr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                    var c = _step.value;
-
-                                    _results.push(String.fromCharCode(c));
-                                }
-                            } catch (err) {
-                                _didIteratorError = true;
-                                _iteratorError = err;
-                            } finally {
-                                try {
-                                    if (!_iteratorNormalCompletion && _iterator.return) {
-                                        _iterator.return();
+                            switch (frame.command) {
+                                case 'CONNECTED':
+                                    if (typeof _this2.debug === 'function') {
+                                        _this2.debug('connected to server ' + frame.headers.server);
                                     }
-                                } finally {
-                                    if (_didIteratorError) {
-                                        throw _iteratorError;
+
+                                    _this2.connected = true;
+
+                                    _this2._setupHeartBeat(frame.headers);
+
+                                    results.push(typeof _this2.debug === 'function' ? _this2.connectCallback(frame) : void 0);
+                                    break;
+
+                                case 'MESSAGE':
+                                    var subscription = frame.headers.subscription;
+                                    var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
+
+                                    if (onreceive) {
+                                        (function () {
+                                            var client = _this2;
+                                            var messageID = frame.headers['message-id'];
+
+                                            frame.ack = function () {
+                                                var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+                                                return client.ack(messageID, subscription, headers);
+                                            };
+
+                                            frame.nack = function () {
+                                                var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+                                                return client.nack(messageID, subscription, headers);
+                                            };
+                                        })();
+                                    } else {
+                                        if (typeof _this2.debug === 'function') {
+                                            _this2.debug('Unhandled received MESSAGE: ' + frame);
+                                        }
                                     }
-                                }
+
+                                    break;
+
+                                case 'RECEIPT':
+                                    if (typeof _this2.onreceipt === 'function') {
+                                        _this2.onreceipt(frame);
+                                    }
+
+                                    break;
+
+                                case 'ERROR':
+                                    if (typeof errorCallback === 'function') {
+                                        errorCallback(frame);
+                                    }
+
+                                    break;
+
+                                default:
+                                    if (typeof _this2.debug === 'function') {
+                                        _this2.debug('Unhandled frame: ' + frame);
+                                    }
+
                             }
-
-                            data = _results.join('');
-                        } else {
-                            data = event.data;
                         }
-
-                        _this2.serverActivity = now();
-
-                        if (data == _Byte2.default.LF) {
-                            if (typeof _this2.debug === 'function') {
-                                _this2.debug('<<< PONG');
-                            }
-
-                            return;
-                        }
-
-                        if (typeof _this2.debug === 'function') {
-                            _this2.debug('<<< ' + data);
-                        }
-
-                        var results = [];
-                        var _iteratorNormalCompletion2 = true;
-                        var _didIteratorError2 = false;
-                        var _iteratorError2 = undefined;
-
+                    } catch (err) {
+                        _didIteratorError2 = true;
+                        _iteratorError2 = err;
+                    } finally {
                         try {
-                            for (var _iterator2 = _Frame2.default.unmarshall(data)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                var frame = _step2.value;
-
-                                switch (frame.command) {
-                                    case 'CONNECTED':
-                                        if (typeof _this2.debug === 'function') {
-                                            _this2.debug('connected to server ' + frame.headers.server);
-                                        }
-
-                                        _this2.connected = true;
-
-                                        _this2._setupHeartBeat(frame.headers);
-
-                                        results.push(typeof _this2.debug === 'function' ? _this2.connectCallback(frame) : void 0);
-                                        break;
-
-                                    case 'MESSAGE':
-                                        var subscription = frame.headers.subscription;
-                                        var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
-
-                                        if (onreceive) {
-                                            (function () {
-                                                var client = _this2;
-                                                var messageID = frame.headers['message-id'];
-
-                                                frame.ack = function () {
-                                                    var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-                                                    return client.ack(messageID, subscription, headers);
-                                                };
-
-                                                frame.nack = function () {
-                                                    var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-                                                    return client.nack(messageID, subscription, headers);
-                                                };
-                                            })();
-                                        } else {
-                                            if (typeof _this2.debug === 'function') {
-                                                _this2.debug('Unhandled received MESSAGE: ' + frame);
-                                            }
-                                        }
-
-                                        break;
-
-                                    case 'RECEIPT':
-                                        if (typeof _this2.onreceipt === 'function') {
-                                            _this2.onreceipt(frame);
-                                        }
-
-                                        break;
-
-                                    case 'ERROR':
-                                        if (typeof errorCallback === 'function') {
-                                            errorCallback(frame);
-                                        }
-
-                                        break;
-
-                                    default:
-                                        if (typeof _this2.debug === 'function') {
-                                            _this2.debug('Unhandled frame: ' + frame);
-                                        }
-
-                                }
+                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                _iterator2.return();
                             }
-                        } catch (err) {
-                            _didIteratorError2 = true;
-                            _iteratorError2 = err;
                         } finally {
-                            try {
-                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                    _iterator2.return();
-                                }
-                            } finally {
-                                if (_didIteratorError2) {
-                                    throw _iteratorError2;
-                                }
+                            if (_didIteratorError2) {
+                                throw _iteratorError2;
                             }
                         }
-                    };
-
-                    this.ws.onclose = function () {
-                        var msg = 'Whoops! Lost connection to ' + _this2.ws.url;
-
-                        if (typeof _this2.debug === 'function') {
-                            _this2.debug(msg);
-                        }
-
-                        _this2._cleanup();
-
-                        if (typeof errorCallback === 'function') {
-                            errorCallback(msg);
-                        }
-                    };
-
-                    this.ws.onopen = function () {
-                        if (typeof _this2.debug === 'function') {
-                            _this2.debug('Web Socket Opened...');
-                        }
-
-                        headers['accept-version'] = _Stomp2.default.VERSIONS.supportedVersions();
-                        headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
-
-                        _this2._transmit('CONNECT', headers);
-                    };
-                }
-            }, {
-                key: 'disconnect',
-                value: function disconnect(disconnectCallback) {
-                    this._transmit('DISCONNECT');
-
-                    this.ws.onclose = null;
-                    this.ws.close();
-
-                    this._cleanup();
-
-                    if (typeof disconnectCallback === 'function') {
-                        disconnectCallback();
                     }
-                }
-            }, {
-                key: '_cleanUp',
-                value: function _cleanUp() {
-                    this.connected = false;
+                };
 
-                    if (this.pinger) {
-                        _Stomp2.default.clearInterval(this.pinger);
+                this.ws.onclose = function () {
+                    var msg = 'Whoops! Lost connection to ' + _this2.ws.url;
+
+                    if (typeof _this2.debug === 'function') {
+                        _this2.debug(msg);
                     }
 
-                    if (this.ponger) {
-                        _Stomp2.default.clearInterval(this.ponger);
-                    }
-                }
-            }, {
-                key: 'send',
-                value: function send(destination) {
-                    var headers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-                    var body = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
-                    headers.destination = destination;
-                    return this._transmit('SEND', headers, body);
-                }
-            }, {
-                key: 'subscribe',
-                value: function subscribe(destination, callback) {
-                    var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+                    _this2._cleanUp();
 
-                    if (!headers.id) {
-                        headers.id = 'sub-' + this.counter++;
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(msg);
+                    }
+                };
+
+                this.ws.onopen = function () {
+                    if (typeof _this2.debug === 'function') {
+                        _this2.debug('Web Socket Opened...');
                     }
 
-                    headers.destination = destination;
-                    this.subscriptions[headers.id] = callback;
+                    headers['accept-version'] = _Stomp2.default.VERSIONS.supportedVersions();
+                    headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
 
-                    this._transmit('SUBSCRIBE', headers);
+                    _this2._transmit('CONNECT', headers);
+                };
+            }
+        }, {
+            key: 'disconnect',
+            value: function disconnect(disconnectCallback) {
+                this._transmit('DISCONNECT');
 
-                    var client = this;
-                    return {
-                        id: headers.id,
-                        unsubscribe: function unsubscribe() {
-                            return client.unsubscribe(headers.id);
-                        }
-                    };
-                }
-            }, {
-                key: 'unsubscribe',
-                value: function unsubscribe(id) {
-                    delete this.subscriptions[id];
+                this.ws.onclose = null;
+                this.ws.close();
 
-                    this._transmit('UNSUBSCRIBE', {
-                        id: id
-                    });
-                }
-            }, {
-                key: 'begin',
-                value: function begin(transaction) {
-                    var txid = transaction || 'tx' + this.counter++;
+                this._cleanUp();
 
-                    this._transmit('BEGIN', {
-                        transaction: txid
-                    });
+                if (typeof disconnectCallback === 'function') {
+                    disconnectCallback();
+                }
+            }
+        }, {
+            key: '_cleanUp',
+            value: function _cleanUp() {
+                this.connected = false;
 
-                    var client = this;
-                    return {
-                        id: txid,
-                        commit: function commit() {
-                            return client.commit(txid);
-                        },
-                        abort: function abort() {
-                            return client.abort(txid);
-                        }
-                    };
+                if (this.pinger) {
+                    _Stomp2.default.clearInterval(this.pinger);
                 }
-            }, {
-                key: 'commit',
-                value: function commit(transaction) {
-                    return this._transmit('COMMIT', {
-                        transaction: transaction
-                    });
-                }
-            }, {
-                key: 'abort',
-                value: function abort(transaction) {
-                    return this._transmit('ABORT', {
-                        transaction: transaction
-                    });
-                }
-            }, {
-                key: 'ack',
-                value: function ack(messageID, subscription) {
-                    var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-                    headers['message-id'] = messageID;
-                    headers.subscription = subscription;
-                    return this._transmit('ACK', headers);
-                }
-            }, {
-                key: 'nack',
-                value: function nack(messageID, subscription) {
-                    var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-                    headers['message-id'] = messageID;
-                    headers.subscription = subscription;
-                    return this._transmit('NACK', headers);
-                }
-            }]);
 
-            return Client;
-        })();
+                if (this.ponger) {
+                    _Stomp2.default.clearInterval(this.ponger);
+                }
+            }
+        }, {
+            key: 'send',
+            value: function send(destination) {
+                var headers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+                var body = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+                headers.destination = destination;
+                return this._transmit('SEND', headers, body);
+            }
+        }, {
+            key: 'subscribe',
+            value: function subscribe(destination, callback) {
+                var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-        exports.default = Client;
-    });
+                if (!headers.id) {
+                    headers.id = 'sub-' + this.counter++;
+                }
+
+                headers.destination = destination;
+                this.subscriptions[headers.id] = callback;
+
+                this._transmit('SUBSCRIBE', headers);
+
+                var client = this;
+                return {
+                    id: headers.id,
+                    unsubscribe: function unsubscribe() {
+                        return client.unsubscribe(headers.id);
+                    }
+                };
+            }
+        }, {
+            key: 'unsubscribe',
+            value: function unsubscribe(id) {
+                delete this.subscriptions[id];
+
+                this._transmit('UNSUBSCRIBE', {
+                    id: id
+                });
+            }
+        }, {
+            key: 'begin',
+            value: function begin(transaction) {
+                var txid = transaction || 'tx' + this.counter++;
+
+                this._transmit('BEGIN', {
+                    transaction: txid
+                });
+
+                var client = this;
+                return {
+                    id: txid,
+                    commit: function commit() {
+                        return client.commit(txid);
+                    },
+                    abort: function abort() {
+                        return client.abort(txid);
+                    }
+                };
+            }
+        }, {
+            key: 'commit',
+            value: function commit(transaction) {
+                return this._transmit('COMMIT', {
+                    transaction: transaction
+                });
+            }
+        }, {
+            key: 'abort',
+            value: function abort(transaction) {
+                return this._transmit('ABORT', {
+                    transaction: transaction
+                });
+            }
+        }, {
+            key: 'ack',
+            value: function ack(messageID, subscription) {
+                var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+                headers['message-id'] = messageID;
+                headers.subscription = subscription;
+                return this._transmit('ACK', headers);
+            }
+        }, {
+            key: 'nack',
+            value: function nack(messageID, subscription) {
+                var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+                headers['message-id'] = messageID;
+                headers.subscription = subscription;
+                return this._transmit('NACK', headers);
+            }
+        }]);
+
+        return Client;
+    })();
+
+    exports.default = Client;
 });
 //# sourceMappingURL=Client.js.map

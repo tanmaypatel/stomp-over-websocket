@@ -10,21 +10,7 @@ let Stomp = {
         {
             return '1.1,1.0';
         }
-    },
-
-    client: function(url, protocols = ['v10.stomp', 'v11.stomp'])
-    {
-        let klass = Stomp.WebSocketClass || WebSocket;
-        let ws = new klass(url, protocols);
-        return new Client(ws);
-    },
-
-    over: function(ws)
-    {
-        return new Client(ws);
-    },
-
-    Frame: Frame
+    }
 };
 
 if(typeof window !== 'undefined' && window !== null)
@@ -39,3 +25,5 @@ if(typeof window !== 'undefined' && window !== null)
         return window.clearInterval(id);
     };
 }
+
+export default Stomp;

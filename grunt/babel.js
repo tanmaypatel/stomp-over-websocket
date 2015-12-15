@@ -1,7 +1,8 @@
 module.exports = {
     development: {
         options: {
-            sourceMap: true
+            sourceMap: true,
+            compact: false
         },
         files: [{
 			expand: true,
