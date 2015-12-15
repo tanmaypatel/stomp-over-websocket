@@ -56,7 +56,9 @@ require([
 		'specs/unit/parse_connect.spec',
 		'specs/unit/connection.spec',
 		'specs/unit/message.spec',
-		'specs/unit/transaction.spec'
+		'specs/unit/transaction.spec',
+		'specs/unit/subscription.spec',
+		'specs/unit/ack.spec',
 	], function()
 	{
 		mocha.run();
