@@ -121,50 +121,25 @@ class Client
         }
     }
 
-    _parseConnect(...args)
+    connect(headers)
     {
-        let headers = {};
-        let connectCallback = null;
-        let errorCallback = null;
-
-        switch(args.length)
-        {
-            case 2:
-                [headers, connectCallback] = args;
-                break;
-
-            case 3:
-                if(args[1] instanceof Function)
-                {
-                    [headers, connectCallback, errorCallback] = args;
-                }
-                else
-                {
-                    [headers.login, headers.passcode, connectCallback] = args;
-                }
-                break;
-            case 4:
-                [headers.login, headers.passcode, connectCallback, errorCallback] = args;
-                break;
-            default:
-                [headers.login, headers.passcode, connectCallback, errorCallback, headers.host] = args;
-                break;
-        }
-
-        return [headers, connectCallback, errorCallback];
-    }
-
-    connect(...args)
-    {
-        let out = this._parseConnect.apply(this, args);
-
-        let headers, errorCallback;
-        [headers, this.connectCallback, errorCallback] = out;
-
         if(typeof this.debug === 'function')
         {
             this.debug(`Opening Web Socket...`);
         }
+
+        this.ws.onopen = (evt) =>
+        {
+            if(typeof this.debug === 'function')
+            {
+             this.debug(`Web Socket Opened...`);
+            }
+
+            headers['accept-version'] = Versions.supportedVersions();
+            headers['heart-beat'] = [this.heartbeat.outgoing, this.heartbeat.incoming].join(',');
+
+            this._transmit(FrameTypes.CONNECT, headers);
+        };
 
         this.ws.onmessage = (evt) =>
         {
@@ -190,7 +165,7 @@ class Client
             }
             else
             {
-                data = event.data;
+                data = evt.data;
             }
 
             this.serverActivity = Utils.now();
@@ -223,7 +198,6 @@ class Client
 
                         this.connected = true;
                         this._setupHeartBeat(frame.headers);
-                        results.push(typeof this.connectCallback === 'function' ? this.connectCallback(frame) : void 0);
 
                         this.emit('connection', frame);
 
@@ -268,13 +242,11 @@ class Client
                             this.onreceipt(frame);
                         }
 
+                        this.emit('receipt', frame);
+
                         break;
 
                     case FrameTypes.ERROR:
-                        if(typeof errorCallback === 'function')
-                        {
-                            errorCallback(frame);
-                        }
 
                         this.emit('error', frame);
 
@@ -289,9 +261,9 @@ class Client
             }
         }
 
-        this.ws.onclose = () =>
+        this.ws.onclose = (evt) =>
         {
-            let isConnectFailed = this.connected ? false : true;
+            let didConnectionFail = !evt.wasClean || !this.connected ? true : false;
 
             let msg = `Whoops! Lost connection to ${this.ws.url}`;
 
@@ -302,49 +274,36 @@ class Client
 
             this._cleanUp();
 
-            if(typeof errorCallback === 'function')
+            if(didConnectionFail)
             {
-                errorCallback(msg);
-            }
-
-            if(isConnectFailed)
-            {
-                this.emit('connection_failed');
+                this.emit('connection_failed', {
+                    code: evt.code,
+                    reason: evt.reason
+                });
             }
             else
             {
-                this.emit('connection_error');
+                this.emit('connection_error', {
+                    code: evt.code,
+                    reason: evt.reason
+                });
             }
-        };
-
-        this.ws.onopen = () =>
-        {
-             if(typeof this.debug === 'function')
-             {
-                 this.debug(`Web Socket Opened...`);
-             }
-
-             headers['accept-version'] = Versions.supportedVersions();
-             headers['heart-beat'] = [this.heartbeat.outgoing, this.heartbeat.incoming].join(',');
-
-             this._transmit(FrameTypes.CONNECT, headers);
         };
     }
 
-    disconnect(disconnectCallback)
+    disconnect()
     {
         this._transmit(FrameTypes.DISCONNECT);
 
-        this.ws.onclose = null;
+        let client = this;
+
+        this.ws.onclose = function(evt)
+        {
+            client.emit('disconnect');
+        };
+
         this.ws.close();
         this._cleanUp();
-
-        if(typeof disconnectCallback === 'function')
-        {
-            disconnectCallback();
-        }
-
-        this.emit('disconnect');
     }
 
     _cleanUp()

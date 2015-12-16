@@ -12,33 +12,58 @@ define([
     	it('Connect to an invalid Stomp server', function(done)
         {
             var client = new Stomp.Client(TEST.badUrl);
-            client.connect('foo', 'bar', function()
+
+            client.on('connection_failed', function(frame)
             {
-            }, function()
-            {
+                client.off('connection_failed');
+
                 done();
+            });
+
+            client.connect({
+                login: 'foo',
+                passcode: 'bar'
             });
         });
 
         it('Connect to a valid Stomp server', function(done)
         {
             var client = new Stomp.Client(TEST.url);
-            client.connect(TEST.login, TEST.password, function()
+
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 done();
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
 
         it('Disconnect', function(done)
         {
             var client = new Stomp.Client(TEST.url);
-            client.connect(TEST.login, TEST.password, function()
+
+            client.on('connection', function()
             {
-                // once connected, we disconnect
-                client.disconnect(function()
-                {
-                    done();
-                });
+                client.off('connection');
+                
+                client.disconnect();
+            });
+
+            client.on('disconnect', function(frame)
+            {
+                client.off('disconnect');
+
+                done();
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
     });

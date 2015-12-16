@@ -26,15 +26,23 @@ define([
         {
             var body = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 client.subscribe(TEST.destination, function(message)
                 {
                     expect(message.body).to.equal(body);
+
                     done();
                 });
 
                 client.send(TEST.destination, {}, body);
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
 
@@ -46,18 +54,26 @@ define([
                 value: Math.random()
             };
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+                
                 client.subscribe(TEST.destination, function(message)
                 {
                     var res = JSON.parse(message.body);
                     expect(res.text).to.equal(payload.text);
                     expect(res.bool).to.equal(payload.bool);
                     expect(res.value).to.equal(payload.value);
+
                     done();
                 });
 
                 client.send(TEST.destination, {}, JSON.stringify(payload));
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
     });

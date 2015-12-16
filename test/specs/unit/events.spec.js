@@ -21,8 +21,9 @@ define([
                     done();
                 });
 
-                invalidClient.connect('foo', 'bar', function()
-                {
+                invalidClient.connect({
+                    login: 'foo',
+                    passcode: 'bar'
                 });
             });
 
@@ -31,14 +32,18 @@ define([
                 var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
-                client.on('connection', function(frame)
+                client.on('connection', function()
                 {
-                    done();
+                    client.off('connection');
+
                     client.disconnect();
+
+                    done();
                 });
 
-                client.connect(TEST.login, TEST.password, function()
-                {
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
                 });
             });
 
@@ -47,18 +52,23 @@ define([
                 var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
-                client.on('connection', function(frame)
+                client.on('connection', function()
                 {
+                    client.off('connection');
+
                     client.disconnect();
                 });
 
                 client.on('disconnect', function(frame)
                 {
+                    client.off('disconnect');
+
                     done();
                 });
 
-                client.connect(TEST.login, TEST.password, function()
-                {
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
                 });
             });
 
@@ -67,18 +77,22 @@ define([
                 var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
-                client.on('connection', function(frame)
+                client.on('connection', function()
                 {
+                    client.off('connection');
                     // turn off STOMP brocker here!
                 });
 
                 client.on('connection_error', function(frame)
                 {
+                    client.off('connection_error');
+
                     done();
                 });
 
-                client.connect(TEST.login, TEST.password, function()
-                {
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
                 });
             });
         });
@@ -98,14 +112,19 @@ define([
                 var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
-                client.on('connection', function(frame)
+                client.on('connection', function()
                 {
-                    client.on('message', function(frame)
+                    client.off('connection');
+
+                    client.on('message', function(message)
                     {
-                        var res = JSON.parse(frame.body);
+                        client.off('message');
+                        
+                        var res = JSON.parse(message.body);
                         expect(res.text).to.equal(payload.text);
                         expect(res.bool).to.equal(payload.bool);
                         expect(res.value).to.equal(payload.value);
+
                         done();
                     });
 
@@ -116,8 +135,9 @@ define([
                     client.send(TEST.destination, {}, JSON.stringify(payload));
                 });
 
-                client.connect(TEST.login, TEST.password, function()
-                {
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
                 });
             });
         });

@@ -26,8 +26,10 @@ define([
         {
             var body = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 var onmessage = function(message)
                 {
                     expect(message.body).to.equal(body);
@@ -37,6 +39,7 @@ define([
                     client.onreceipt = function(frame)
                     {
                         expect(receipt).to.equal(frame.headers['receipt-id']);
+
                         done();
                     }
 
@@ -49,14 +52,21 @@ define([
 
                 client.send(TEST.destination, {}, body);
             });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
+            });
         });
 
     	it('Subscribe using client ack mode, send a message and nack it', function(done)
         {
             var body = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+                
                 var onmessage = function(message)
                 {
                     expect(message.body).to.equal(body);
@@ -66,6 +76,7 @@ define([
                     client.onreceipt = function(frame)
                     {
                         expect(receipt).to.equal(frame.headers['receipt-id']);
+
                         done();
                     }
 
@@ -77,6 +88,11 @@ define([
                 });
 
                 client.send(TEST.destination, {}, body);
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
     });

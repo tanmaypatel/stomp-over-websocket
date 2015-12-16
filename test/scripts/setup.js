@@ -54,13 +54,12 @@ require([
 	require([
 		'specs/unit/websocket.spec',
 		'specs/unit/frame.spec',
-		'specs/unit/parse_connect.spec',
+		'specs/unit/events.spec',
 		'specs/unit/connection.spec',
+		'specs/unit/subscription.spec',
 		'specs/unit/message.spec',
 		'specs/unit/transaction.spec',
-		'specs/unit/subscription.spec',
-		'specs/unit/ack.spec',
-		'specs/unit/events.spec'
+		'specs/unit/ack.spec'
 	], function()
 	{
 		mocha.run();

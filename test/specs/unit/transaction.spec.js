@@ -27,8 +27,10 @@ define([
             var body = Math.random() + '';
             var body2 = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 client.subscribe(TEST.destination, function(message)
                 {
                     // we should receive the 2nd message outside the transaction
@@ -44,14 +46,21 @@ define([
 
                 client.send(TEST.destination, {}, body2);
             });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
+            });
         });
 
         it('Send a message in a transaction and commit', function(done)
         {
             var body = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 client.subscribe(TEST.destination, function(message)
                 {
                     // we should receive the 2nd message outside the transaction
@@ -65,14 +74,21 @@ define([
                 }, body);
                 tx.commit();
             });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
+            });
         });
 
         it('Send a message outside a transaction and abort', function(done)
         {
             var body = Math.random() + '';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+                
                 client.subscribe(TEST.destination, function(message)
                 {
                     // we should receive the 2nd message outside the transaction
@@ -83,6 +99,11 @@ define([
                 var tx = client.begin();
                 client.send(TEST.destination, {}, body);
                 tx.abort();
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
     });

@@ -192,76 +192,24 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                 }
             }
         }, {
-            key: '_parseConnect',
-            value: function _parseConnect() {
-                var headers = {};
-                var connectCallback = null;
-                var errorCallback = null;
-
-                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                    args[_key] = arguments[_key];
-                }
-
-                switch (args.length) {
-                    case 2:
-                        headers = args[0];
-                        connectCallback = args[1];
-                        break;
-
-                    case 3:
-                        if (args[1] instanceof Function) {
-                            headers = args[0];
-                            connectCallback = args[1];
-                            errorCallback = args[2];
-                        } else {
-                            headers.login = args[0];
-                            headers.passcode = args[1];
-                            connectCallback = args[2];
-                        }
-
-                        break;
-
-                    case 4:
-                        headers.login = args[0];
-                        headers.passcode = args[1];
-                        connectCallback = args[2];
-                        errorCallback = args[3];
-                        break;
-
-                    default:
-                        headers.login = args[0];
-                        headers.passcode = args[1];
-                        connectCallback = args[2];
-                        errorCallback = args[3];
-                        headers.host = args[4];
-                        break;
-                }
-
-                return [headers, connectCallback, errorCallback];
-            }
-        }, {
             key: 'connect',
-            value: function connect() {
+            value: function connect(headers) {
                 var _this2 = this;
-
-                for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                    args[_key2] = arguments[_key2];
-                }
-
-                var out = this._parseConnect.apply(this, args);
-
-                var headers = undefined,
-                    errorCallback = undefined;
-
-                var _out = _slicedToArray(out, 3);
-
-                headers = _out[0];
-                this.connectCallback = _out[1];
-                errorCallback = _out[2];
 
                 if (typeof this.debug === 'function') {
                     this.debug('Opening Web Socket...');
                 }
+
+                this.ws.onopen = function (evt) {
+                    if (typeof _this2.debug === 'function') {
+                        _this2.debug('Web Socket Opened...');
+                    }
+
+                    headers['accept-version'] = _Versions2.default.supportedVersions();
+                    headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
+
+                    _this2._transmit(_FrameTypes2.default.CONNECT, headers);
+                };
 
                 this.ws.onmessage = function (evt) {
                     var data = undefined,
@@ -302,7 +250,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
 
                         data = _results.join('');
                     } else {
-                        data = event.data;
+                        data = evt.data;
                     }
 
                     _this2.serverActivity = _Utils2.default.now();
@@ -337,8 +285,6 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                                     _this2.connected = true;
 
                                     _this2._setupHeartBeat(frame.headers);
-
-                                    results.push(typeof _this2.connectCallback === 'function' ? _this2.connectCallback(frame) : void 0);
 
                                     _this2.emit('connection', frame);
 
@@ -380,13 +326,11 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                                         _this2.onreceipt(frame);
                                     }
 
+                                    _this2.emit('receipt', frame);
+
                                     break;
 
                                 case _FrameTypes2.default.ERROR:
-                                    if (typeof errorCallback === 'function') {
-                                        errorCallback(frame);
-                                    }
-
                                     _this2.emit('error', frame);
 
                                     break;
@@ -414,8 +358,8 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                     }
                 };
 
-                this.ws.onclose = function () {
-                    var isConnectFailed = _this2.connected ? false : true;
+                this.ws.onclose = function (evt) {
+                    var didConnectionFail = !evt.wasClean || !_this2.connected ? true : false;
                     var msg = 'Whoops! Lost connection to ' + _this2.ws.url;
 
                     if (typeof _this2.debug === 'function') {
@@ -424,43 +368,33 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
 
                     _this2._cleanUp();
 
-                    if (typeof errorCallback === 'function') {
-                        errorCallback(msg);
-                    }
-
-                    if (isConnectFailed) {
-                        _this2.emit('connection_failed');
+                    if (didConnectionFail) {
+                        _this2.emit('connection_failed', {
+                            code: evt.code,
+                            reason: evt.reason
+                        });
                     } else {
-                        _this2.emit('connection_error');
+                        _this2.emit('connection_error', {
+                            code: evt.code,
+                            reason: evt.reason
+                        });
                     }
-                };
-
-                this.ws.onopen = function () {
-                    if (typeof _this2.debug === 'function') {
-                        _this2.debug('Web Socket Opened...');
-                    }
-
-                    headers['accept-version'] = _Versions2.default.supportedVersions();
-                    headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
-
-                    _this2._transmit(_FrameTypes2.default.CONNECT, headers);
                 };
             }
         }, {
             key: 'disconnect',
-            value: function disconnect(disconnectCallback) {
+            value: function disconnect() {
                 this._transmit(_FrameTypes2.default.DISCONNECT);
 
-                this.ws.onclose = null;
+                var client = this;
+
+                this.ws.onclose = function (evt) {
+                    client.emit('disconnect');
+                };
+
                 this.ws.close();
 
                 this._cleanUp();
-
-                if (typeof disconnectCallback === 'function') {
-                    disconnectCallback();
-                }
-
-                this.emit('disconnect');
             }
         }, {
             key: '_cleanUp',

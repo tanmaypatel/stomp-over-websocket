@@ -26,15 +26,23 @@ define([
         {
             var msg = 'Is anybody out there?';
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 client.subscribe(TEST.destination, function(frame)
                 {
                     expect(frame.body).to.equal(msg);
+
                     done();
                 });
 
                 client.send(TEST.destination, {}, msg);
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
 
@@ -44,8 +52,10 @@ define([
                 subscription1 = null,
                 subscription2 = null;
 
-            client.connect(TEST.login, TEST.password, function()
+            client.on('connection', function()
             {
+                client.off('connection');
+
                 subscription1 = client.subscribe(TEST.destination, function(frame)
                 {
                     expect(false).to.not.equal('Should not have received message!');
@@ -59,6 +69,11 @@ define([
 
                 subscription1.unsubscribe();
                 client.send(TEST.destination, {}, msg1);
+            });
+
+            client.connect({
+                login: TEST.login,
+                passcode: TEST.password
             });
         });
     });
