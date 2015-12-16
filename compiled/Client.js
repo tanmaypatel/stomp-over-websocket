@@ -1,6 +1,6 @@
 'use strict';
 
-define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _Frame, _Stomp) {
+define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (exports, _Byte, _Frame, _Stomp, _FrameTypes) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -10,6 +10,8 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
     var _Frame2 = _interopRequireDefault(_Frame);
 
     var _Stomp2 = _interopRequireDefault(_Stomp);
+
+    var _FrameTypes2 = _interopRequireDefault(_FrameTypes);
 
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : {
@@ -327,7 +329,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                             var frame = _step2.value;
 
                             switch (frame.command) {
-                                case 'CONNECTED':
+                                case _FrameTypes2.default.CONNECTED:
                                     if (typeof _this2.debug === 'function') {
                                         _this2.debug('connected to server ' + frame.headers.server);
                                     }
@@ -339,7 +341,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                                     results.push(typeof _this2.debug === 'function' ? _this2.connectCallback(frame) : void 0);
                                     break;
 
-                                case 'MESSAGE':
+                                case _FrameTypes2.default.MESSAGE:
                                     var subscription = frame.headers.subscription;
                                     var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
 
@@ -368,14 +370,14 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
 
                                     break;
 
-                                case 'RECEIPT':
+                                case _FrameTypes2.default.RECEIPT:
                                     if (typeof _this2.onreceipt === 'function') {
                                         _this2.onreceipt(frame);
                                     }
 
                                     break;
 
-                                case 'ERROR':
+                                case _FrameTypes2.default.ERROR:
                                     if (typeof errorCallback === 'function') {
                                         errorCallback(frame);
                                     }
@@ -427,13 +429,13 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                     headers['accept-version'] = _Stomp2.default.VERSIONS.supportedVersions();
                     headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
 
-                    _this2._transmit('CONNECT', headers);
+                    _this2._transmit(_FrameTypes2.default.CONNECT, headers);
                 };
             }
         }, {
             key: 'disconnect',
             value: function disconnect(disconnectCallback) {
-                this._transmit('DISCONNECT');
+                this._transmit(_FrameTypes2.default.DISCONNECT);
 
                 this.ws.onclose = null;
                 this.ws.close();
@@ -463,7 +465,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                 var headers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
                 var body = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
                 headers.destination = destination;
-                return this._transmit('SEND', headers, body);
+                return this._transmit(_FrameTypes2.default.SEND, headers, body);
             }
         }, {
             key: 'subscribe',
@@ -477,7 +479,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                 headers.destination = destination;
                 this.subscriptions[headers.id] = callback;
 
-                this._transmit('SUBSCRIBE', headers);
+                this._transmit(_FrameTypes2.default.SUBSCRIBE, headers);
 
                 var client = this;
                 return {
@@ -492,7 +494,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
             value: function unsubscribe(id) {
                 delete this.subscriptions[id];
 
-                this._transmit('UNSUBSCRIBE', {
+                this._transmit(_FrameTypes2.default.UNSUBSCRIBE, {
                     id: id
                 });
             }
@@ -501,7 +503,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
             value: function begin(transaction) {
                 var txid = transaction || 'tx' + this.counter++;
 
-                this._transmit('BEGIN', {
+                this._transmit(_FrameTypes2.default.BEGIN, {
                     transaction: txid
                 });
 
@@ -519,14 +521,14 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
         }, {
             key: 'commit',
             value: function commit(transaction) {
-                return this._transmit('COMMIT', {
+                return this._transmit(_FrameTypes2.default.COMMIT, {
                     transaction: transaction
                 });
             }
         }, {
             key: 'abort',
             value: function abort(transaction) {
-                return this._transmit('ABORT', {
+                return this._transmit(_FrameTypes2.default.ABORT, {
                     transaction: transaction
                 });
             }
@@ -536,7 +538,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
-                return this._transmit('ACK', headers);
+                return this._transmit(_FrameTypes2.default.ACK, headers);
             }
         }, {
             key: 'nack',
@@ -544,7 +546,7 @@ define(['exports', './Byte', './Frame', './Stomp'], function (exports, _Byte, _F
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
-                return this._transmit('NACK', headers);
+                return this._transmit(_FrameTypes2.default.NACK, headers);
             }
         }]);
 

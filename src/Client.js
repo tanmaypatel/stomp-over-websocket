@@ -1,6 +1,7 @@
 import Byte from './Byte';
 import Frame from './Frame';
 import Stomp from './Stomp';
+import FrameTypes from './FrameTypes';
 
 let now = ()=>
 {
@@ -220,7 +221,7 @@ class Client
             {
                 switch(frame.command)
                 {
-                    case 'CONNECTED':
+                    case FrameTypes.CONNECTED:
                         if(typeof this.debug === 'function')
                         {
                             this.debug(`connected to server ${frame.headers.server}`);
@@ -231,7 +232,7 @@ class Client
                         results.push(typeof this.debug === 'function' ? this.connectCallback(frame) : void 0);
                         break;
 
-                    case 'MESSAGE':
+                    case FrameTypes.MESSAGE:
                         let subscription = frame.headers.subscription;
 
                         let onreceive = this.subscriptions[subscription] || this.onreceive;
@@ -262,7 +263,7 @@ class Client
                         }
                         break;
 
-                    case 'RECEIPT':
+                    case FrameTypes.RECEIPT:
                         if(typeof this.onreceipt === 'function')
                         {
                             this.onreceipt(frame);
@@ -270,7 +271,7 @@ class Client
 
                         break;
 
-                    case 'ERROR':
+                    case FrameTypes.ERROR:
                         if(typeof errorCallback === 'function')
                         {
                             errorCallback(frame);
@@ -314,13 +315,13 @@ class Client
              headers['accept-version'] = Stomp.VERSIONS.supportedVersions();
              headers['heart-beat'] = [this.heartbeat.outgoing, this.heartbeat.incoming].join(',');
 
-             this._transmit('CONNECT', headers);
+             this._transmit(FrameTypes.CONNECT, headers);
         };
     }
 
     disconnect(disconnectCallback)
     {
-        this._transmit('DISCONNECT');
+        this._transmit(FrameTypes.DISCONNECT);
 
         this.ws.onclose = null;
         this.ws.close();
@@ -350,7 +351,7 @@ class Client
     send(destination, headers = {}, body = '')
     {
         headers.destination = destination;
-        return this._transmit('SEND', headers, body);
+        return this._transmit(FrameTypes.SEND, headers, body);
     }
 
     subscribe(destination, callback, headers = {})
@@ -364,7 +365,7 @@ class Client
 
         this.subscriptions[headers.id] = callback;
 
-        this._transmit('SUBSCRIBE', headers);
+        this._transmit(FrameTypes.SUBSCRIBE, headers);
 
         let client = this;
 
@@ -381,7 +382,7 @@ class Client
     {
         delete this.subscriptions[id];
 
-        this._transmit('UNSUBSCRIBE', {
+        this._transmit(FrameTypes.UNSUBSCRIBE, {
             id: id
         });
     }
@@ -390,7 +391,7 @@ class Client
     {
         let txid = transaction || 'tx' + this.counter++;
 
-        this._transmit('BEGIN', {
+        this._transmit(FrameTypes.BEGIN, {
             transaction: txid
         });
 
@@ -411,14 +412,14 @@ class Client
 
     commit(transaction)
     {
-        return this._transmit('COMMIT', {
+        return this._transmit(FrameTypes.COMMIT, {
             transaction: transaction
         });
     }
 
     abort(transaction)
     {
-        return this._transmit('ABORT', {
+        return this._transmit(FrameTypes.ABORT, {
             transaction: transaction
         });
     }
@@ -427,14 +428,14 @@ class Client
     {
         headers['message-id'] = messageID;
         headers.subscription = subscription;
-        return this._transmit('ACK', headers);
+        return this._transmit(FrameTypes.ACK, headers);
     }
 
     nack(messageID, subscription, headers = {})
     {
         headers['message-id'] = messageID;
         headers.subscription = subscription;
-        return this._transmit('NACK', headers);
+        return this._transmit(FrameTypes.NACK, headers);
     }
 }
 
