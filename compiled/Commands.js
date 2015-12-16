@@ -4,7 +4,7 @@ define(['exports'], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-    var FrameTypes = {
+    var Commands = {
         CONNECT: 'CONNECT',
         DISCONNECT: 'DISCONNECT',
         CONNECTED: 'CONNECTED',
@@ -20,6 +20,6 @@ define(['exports'], function (exports) {
         ABORT: 'ABORT',
         ERROR: 'ERROR'
     };
-    exports.default = FrameTypes;
+    exports.default = Commands;
 });
-//# sourceMappingURL=FrameTypes.js.map
+//# sourceMappingURL=Commands.js.map

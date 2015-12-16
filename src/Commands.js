@@ -1,4 +1,4 @@
-const FrameTypes = {
+const Commands = {
     // connection
     CONNECT: 'CONNECT',
     DISCONNECT: 'DISCONNECT',
@@ -25,4 +25,4 @@ const FrameTypes = {
     ERROR: 'ERROR'
 };
 
-export default FrameTypes;
+export default Commands;

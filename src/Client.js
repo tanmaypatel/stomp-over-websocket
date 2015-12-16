@@ -3,7 +3,7 @@ import Events from 'minivents';
 import Byte from './Byte';
 import Frame from './Frame';
 import Versions from './Versions';
-import FrameTypes from './FrameTypes';
+import Commands from './Commands';
 import Utils from './Utils';
 
 class Client
@@ -138,7 +138,7 @@ class Client
             headers['accept-version'] = Versions.supportedVersions();
             headers['heart-beat'] = [this.heartbeat.outgoing, this.heartbeat.incoming].join(',');
 
-            this._transmit(FrameTypes.CONNECT, headers);
+            this._transmit(Commands.CONNECT, headers);
         };
 
         this.ws.onmessage = (evt) =>
@@ -188,9 +188,11 @@ class Client
             let results = [];
             for(let frame of Frame.unmarshall(data))
             {
+                this.emit('frame', frame);
+
                 switch(frame.command)
                 {
-                    case FrameTypes.CONNECTED:
+                    case Commands.CONNECTED:
                         if(typeof this.debug === 'function')
                         {
                             this.debug(`connected to server ${frame.headers.server}`);
@@ -203,7 +205,7 @@ class Client
 
                         break;
 
-                    case FrameTypes.MESSAGE:
+                    case Commands.MESSAGE:
                         let subscription = frame.headers.subscription;
 
                         let onreceive = this.subscriptions[subscription] || this.onreceive;
@@ -236,23 +238,20 @@ class Client
                         }
                         break;
 
-                    case FrameTypes.RECEIPT:
-                        if(typeof this.onreceipt === 'function')
-                        {
-                            this.onreceipt(frame);
-                        }
+                    case Commands.RECEIPT:
 
                         this.emit('receipt', frame);
 
                         break;
 
-                    case FrameTypes.ERROR:
+                    case Commands.ERROR:
 
                         this.emit('error', frame);
 
                         break;
 
                     default:
+
                         if(typeof this.debug === 'function')
                         {
                             this.debug(`Unhandled frame: ${frame}`);
@@ -293,7 +292,7 @@ class Client
 
     disconnect()
     {
-        this._transmit(FrameTypes.DISCONNECT);
+        this._transmit(Commands.DISCONNECT);
 
         let client = this;
 
@@ -324,7 +323,7 @@ class Client
     send(destination, headers = {}, body = '')
     {
         headers.destination = destination;
-        return this._transmit(FrameTypes.SEND, headers, body);
+        return this._transmit(Commands.SEND, headers, body);
     }
 
     subscribe(destination, callback, headers = {})
@@ -338,7 +337,7 @@ class Client
 
         this.subscriptions[headers.id] = callback;
 
-        this._transmit(FrameTypes.SUBSCRIBE, headers);
+        this._transmit(Commands.SUBSCRIBE, headers);
 
         let client = this;
 
@@ -355,7 +354,7 @@ class Client
     {
         delete this.subscriptions[id];
 
-        this._transmit(FrameTypes.UNSUBSCRIBE, {
+        this._transmit(Commands.UNSUBSCRIBE, {
             id: id
         });
     }
@@ -364,7 +363,7 @@ class Client
     {
         let txid = transaction || 'tx' + this.counter++;
 
-        this._transmit(FrameTypes.BEGIN, {
+        this._transmit(Commands.BEGIN, {
             transaction: txid
         });
 
@@ -385,14 +384,14 @@ class Client
 
     commit(transaction)
     {
-        return this._transmit(FrameTypes.COMMIT, {
+        return this._transmit(Commands.COMMIT, {
             transaction: transaction
         });
     }
 
     abort(transaction)
     {
-        return this._transmit(FrameTypes.ABORT, {
+        return this._transmit(Commands.ABORT, {
             transaction: transaction
         });
     }
@@ -401,14 +400,14 @@ class Client
     {
         headers['message-id'] = messageID;
         headers.subscription = subscription;
-        return this._transmit(FrameTypes.ACK, headers);
+        return this._transmit(Commands.ACK, headers);
     }
 
     nack(messageID, subscription, headers = {})
     {
         headers['message-id'] = messageID;
         headers.subscription = subscription;
-        return this._transmit(FrameTypes.NACK, headers);
+        return this._transmit(Commands.NACK, headers);
     }
 }
 

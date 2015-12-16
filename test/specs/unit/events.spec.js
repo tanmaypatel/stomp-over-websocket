@@ -7,6 +7,157 @@ define([
 {
     describe('Event Triggering', function()
     {
+        describe('Events related with Frames', function()
+        {
+            this.timeout(5000);
+
+            var client;
+
+            beforeEach(function()
+            {
+                client = new Stomp.Client(TEST.url);
+                client.debug = TEST.debug;
+            });
+
+            afterEach(function()
+            {
+                client.disconnect();
+            });
+
+            it('frame event gets fired in case of successful connection', function(done)
+            {
+                client.on('frame', function(frame)
+                {
+                    client.off('frame');
+
+                    expect(frame.command).to.equal(Stomp.Commands.CONNECTED);
+
+                    done();
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+
+            it('frame event gets fired in case of received message', function(done)
+            {
+                var payload = {
+                    text: 'hello',
+                    bool: true,
+                    value: Math.random()
+                };
+
+                client.on('connection', function()
+                {
+                    client.off('connection');
+
+                    client.on('frame', function(frame)
+                    {
+                        client.off('frame');
+
+                        expect(frame.command).to.equal(Stomp.Commands.MESSAGE);
+
+                        done();
+                    });
+
+                    client.subscribe(TEST.destination, function(message)
+                    {
+                    });
+
+                    client.send(TEST.destination, {}, JSON.stringify(payload));
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+
+            it('frame event gets fired in case of ack receipt', function(done)
+            {
+                var body = Math.random() + '';
+
+                client.on('connection', function()
+                {
+                    client.off('connection');
+
+                    var onmessage = function(message)
+                    {
+                        expect(message.body).to.equal(body);
+
+                        var receipt = Math.random() + '';
+
+                        client.on('frame', function(frame)
+                        {
+                            client.off('frame');
+
+                            expect(frame.command).to.equal(Stomp.Commands.RECEIPT);
+
+                            done();
+                        });
+
+                        message.ack({
+                            receipt: receipt
+                        });
+                    }
+
+                    var sub = client.subscribe(TEST.destination, onmessage, {
+                        'ack': 'client'
+                    });
+
+                    client.send(TEST.destination, {}, body);
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+
+            it('frame event gets fired in case of nack receipt', function(done)
+            {
+                var body = Math.random() + '';
+
+                client.on('connection', function()
+                {
+                    client.off('connection');
+
+                    var onmessage = function(message)
+                    {
+                        expect(message.body).to.equal(body);
+
+                        var receipt = Math.random() + '';
+
+                        client.on('frame', function(frame)
+                        {
+                            client.off('frame');
+
+                            expect(frame.command).to.equal(Stomp.Commands.RECEIPT);
+
+                            done();
+                        });
+
+                        message.nack({
+                            receipt: receipt
+                        });
+                    }
+
+                    var sub = client.subscribe(TEST.destination, onmessage, {
+                        'ack': 'client'
+                    });
+
+                    client.send(TEST.destination, {}, body);
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+        });
+
         describe('Events related with Connection', function()
         {
             this.timeout(30000);
@@ -18,6 +169,7 @@ define([
 
                 invalidClient.on('connection_failed', function(frame)
                 {
+                    invalidClient.off('connection_failed');
                     done();
                 });
 
@@ -119,7 +271,7 @@ define([
                     client.on('message', function(message)
                     {
                         client.off('message');
-                        
+
                         var res = JSON.parse(message.body);
                         expect(res.text).to.equal(payload.text);
                         expect(res.bool).to.equal(payload.bool);
@@ -133,6 +285,104 @@ define([
                     });
 
                     client.send(TEST.destination, {}, JSON.stringify(payload));
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+        });
+
+        describe('Events related with Receipt', function()
+        {
+            var client;
+
+            beforeEach(function()
+            {
+                client = new Stomp.Client(TEST.url);
+                client.debug = TEST.debug;
+            });
+
+            afterEach(function()
+            {
+                client.disconnect();
+            });
+
+            it('receipt event gets fired in case of ack receipt', function(done)
+            {
+                var body = Math.random() + '';
+
+                client.on('connection', function()
+                {
+                    client.off('connection');
+
+                    var onmessage = function(message)
+                    {
+                        expect(message.body).to.equal(body);
+
+                        var receipt = Math.random() + '';
+
+                        client.on('receipt', function(frame)
+                        {
+                            client.off('receipt');
+
+                            expect(receipt).to.equal(frame.headers['receipt-id']);
+
+                            done();
+                        });
+
+                        message.ack({
+                            receipt: receipt
+                        });
+                    }
+
+                    var sub = client.subscribe(TEST.destination, onmessage, {
+                        'ack': 'client'
+                    });
+
+                    client.send(TEST.destination, {}, body);
+                });
+
+                client.connect({
+                    login: TEST.login,
+                    passcode: TEST.password
+                });
+            });
+
+            it('receipt event gets fired in case of nack receipt', function(done)
+            {
+                var body = Math.random() + '';
+
+                client.on('connection', function()
+                {
+                    client.off('connection');
+
+                    var onmessage = function(message)
+                    {
+                        expect(message.body).to.equal(body);
+
+                        var receipt = Math.random() + '';
+
+                        client.on('receipt', function(frame)
+                        {
+                            client.off('receipt');
+
+                            expect(receipt).to.equal(frame.headers['receipt-id']);
+
+                            done();
+                        });
+
+                        message.nack({
+                            receipt: receipt
+                        });
+                    }
+
+                    var sub = client.subscribe(TEST.destination, onmessage, {
+                        'ack': 'client'
+                    });
+
+                    client.send(TEST.destination, {}, body);
                 });
 
                 client.connect({

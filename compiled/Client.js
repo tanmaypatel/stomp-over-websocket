@@ -1,6 +1,6 @@
 'use strict';
 
-define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes', './Utils'], function (exports, _minivents, _Byte, _Frame, _Versions, _FrameTypes, _Utils) {
+define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands', './Utils'], function (exports, _minivents, _Byte, _Frame, _Versions, _Commands, _Utils) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -13,7 +13,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
 
     var _Versions2 = _interopRequireDefault(_Versions);
 
-    var _FrameTypes2 = _interopRequireDefault(_FrameTypes);
+    var _Commands2 = _interopRequireDefault(_Commands);
 
     var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -208,7 +208,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                     headers['accept-version'] = _Versions2.default.supportedVersions();
                     headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
 
-                    _this2._transmit(_FrameTypes2.default.CONNECT, headers);
+                    _this2._transmit(_Commands2.default.CONNECT, headers);
                 };
 
                 this.ws.onmessage = function (evt) {
@@ -276,8 +276,10 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                         for (var _iterator2 = _Frame2.default.unmarshall(data)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                             var frame = _step2.value;
 
+                            _this2.emit('frame', frame);
+
                             switch (frame.command) {
-                                case _FrameTypes2.default.CONNECTED:
+                                case _Commands2.default.CONNECTED:
                                     if (typeof _this2.debug === 'function') {
                                         _this2.debug('connected to server ' + frame.headers.server);
                                     }
@@ -290,7 +292,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
 
                                     break;
 
-                                case _FrameTypes2.default.MESSAGE:
+                                case _Commands2.default.MESSAGE:
                                     var subscription = frame.headers.subscription;
                                     var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
 
@@ -321,16 +323,12 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
 
                                     break;
 
-                                case _FrameTypes2.default.RECEIPT:
-                                    if (typeof _this2.onreceipt === 'function') {
-                                        _this2.onreceipt(frame);
-                                    }
-
+                                case _Commands2.default.RECEIPT:
                                     _this2.emit('receipt', frame);
 
                                     break;
 
-                                case _FrameTypes2.default.ERROR:
+                                case _Commands2.default.ERROR:
                                     _this2.emit('error', frame);
 
                                     break;
@@ -384,7 +382,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
         }, {
             key: 'disconnect',
             value: function disconnect() {
-                this._transmit(_FrameTypes2.default.DISCONNECT);
+                this._transmit(_Commands2.default.DISCONNECT);
 
                 var client = this;
 
@@ -415,7 +413,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                 var headers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
                 var body = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
                 headers.destination = destination;
-                return this._transmit(_FrameTypes2.default.SEND, headers, body);
+                return this._transmit(_Commands2.default.SEND, headers, body);
             }
         }, {
             key: 'subscribe',
@@ -429,7 +427,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                 headers.destination = destination;
                 this.subscriptions[headers.id] = callback;
 
-                this._transmit(_FrameTypes2.default.SUBSCRIBE, headers);
+                this._transmit(_Commands2.default.SUBSCRIBE, headers);
 
                 var client = this;
                 return {
@@ -444,7 +442,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
             value: function unsubscribe(id) {
                 delete this.subscriptions[id];
 
-                this._transmit(_FrameTypes2.default.UNSUBSCRIBE, {
+                this._transmit(_Commands2.default.UNSUBSCRIBE, {
                     id: id
                 });
             }
@@ -453,7 +451,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
             value: function begin(transaction) {
                 var txid = transaction || 'tx' + this.counter++;
 
-                this._transmit(_FrameTypes2.default.BEGIN, {
+                this._transmit(_Commands2.default.BEGIN, {
                     transaction: txid
                 });
 
@@ -471,14 +469,14 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
         }, {
             key: 'commit',
             value: function commit(transaction) {
-                return this._transmit(_FrameTypes2.default.COMMIT, {
+                return this._transmit(_Commands2.default.COMMIT, {
                     transaction: transaction
                 });
             }
         }, {
             key: 'abort',
             value: function abort(transaction) {
-                return this._transmit(_FrameTypes2.default.ABORT, {
+                return this._transmit(_Commands2.default.ABORT, {
                     transaction: transaction
                 });
             }
@@ -488,7 +486,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
-                return this._transmit(_FrameTypes2.default.ACK, headers);
+                return this._transmit(_Commands2.default.ACK, headers);
             }
         }, {
             key: 'nack',
@@ -496,7 +494,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
-                return this._transmit(_FrameTypes2.default.NACK, headers);
+                return this._transmit(_Commands2.default.NACK, headers);
             }
         }]);
 

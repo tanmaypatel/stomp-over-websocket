@@ -36,14 +36,18 @@ define([
 
                     var receipt = Math.random() + '';
 
-                    client.onreceipt = function(frame)
+                    client.on('receipt', function(frame)
                     {
+                        client.off('receipt');
+
                         expect(receipt).to.equal(frame.headers['receipt-id']);
 
                         done();
-                    }
+                    });
 
-                    message.ack({'receipt': receipt});
+                    message.ack({
+                        'receipt': receipt
+                    });
                 }
 
                 var sub = client.subscribe(TEST.destination, onmessage, {
@@ -66,21 +70,25 @@ define([
             client.on('connection', function()
             {
                 client.off('connection');
-                
+
                 var onmessage = function(message)
                 {
                     expect(message.body).to.equal(body);
 
                     var receipt = Math.random() + '';
 
-                    client.onreceipt = function(frame)
+                    client.on('receipt', function(frame)
                     {
+                        client.off('receipt');
+
                         expect(receipt).to.equal(frame.headers['receipt-id']);
 
                         done();
-                    }
+                    });
 
-                    message.nack({'receipt': receipt});
+                    message.nack({
+                        'receipt': receipt
+                    });
                 }
 
                 var sub = client.subscribe(TEST.destination, onmessage, {
