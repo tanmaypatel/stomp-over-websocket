@@ -1,3 +1,5 @@
+import Events from 'minivents';
+
 import Byte from './Byte';
 import Frame from './Frame';
 import Stomp from './Stomp';
@@ -31,6 +33,9 @@ class Client
         this.maxWebSocketFrameSize = 16 * 1024;
         this.subscriptions = {};
         this.partialData = '';
+
+        // applying events mixins to support event handlers
+        Events(this);
     }
 
     debug(message)
@@ -229,13 +234,18 @@ class Client
 
                         this.connected = true;
                         this._setupHeartBeat(frame.headers);
-                        results.push(typeof this.debug === 'function' ? this.connectCallback(frame) : void 0);
+                        results.push(typeof this.connectCallback === 'function' ? this.connectCallback(frame) : void 0);
+
+                        this.emit('connection', frame);
+
                         break;
 
                     case FrameTypes.MESSAGE:
                         let subscription = frame.headers.subscription;
 
                         let onreceive = this.subscriptions[subscription] || this.onreceive;
+
+                        this.emit('message', frame);
 
                         if(onreceive)
                         {
@@ -277,6 +287,8 @@ class Client
                             errorCallback(frame);
                         }
 
+                        this.emit('error', frame);
+
                         break;
 
                     default:
@@ -290,19 +302,30 @@ class Client
 
         this.ws.onclose = () =>
         {
-             let msg = `Whoops! Lost connection to ${this.ws.url}`;
+            let isConnectFailed = this.connected ? false : true;
 
-             if(typeof this.debug === 'function')
-             {
-                 this.debug(msg);
-             }
+            let msg = `Whoops! Lost connection to ${this.ws.url}`;
 
-             this._cleanUp();
+            if(typeof this.debug === 'function')
+            {
+                this.debug(msg);
+            }
 
-             if(typeof errorCallback === 'function')
-             {
-                 errorCallback(msg);
-             }
+            this._cleanUp();
+
+            if(typeof errorCallback === 'function')
+            {
+                errorCallback(msg);
+            }
+
+            if(isConnectFailed)
+            {
+                this.emit('connection_failed');
+            }
+            else
+            {
+                this.emit('connection_error');
+            }
         };
 
         this.ws.onopen = () =>
@@ -331,6 +354,8 @@ class Client
         {
             disconnectCallback();
         }
+
+        this.emit('disconnect');
     }
 
     _cleanUp()

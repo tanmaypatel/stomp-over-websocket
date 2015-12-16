@@ -25,5 +25,8 @@
     "chai": "~3.4.2",
     "sinon": "~1.17.2",
     "sinon-chai": "~2.8.0"
+  },
+  "dependencies": {
+    "minivents": "~2.0.0"
   }
 }

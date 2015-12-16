@@ -1,9 +1,11 @@
 'use strict';
 
-define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (exports, _Byte, _Frame, _Stomp, _FrameTypes) {
+define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'], function (exports, _minivents, _Byte, _Frame, _Stomp, _FrameTypes) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+
+    var _minivents2 = _interopRequireDefault(_minivents);
 
     var _Byte2 = _interopRequireDefault(_Byte);
 
@@ -104,6 +106,7 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
             this.maxWebSocketFrameSize = 16 * 1024;
             this.subscriptions = {};
             this.partialData = '';
+            (0, _minivents2.default)(this);
         }
 
         _createClass(Client, [{
@@ -338,12 +341,17 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
 
                                     _this2._setupHeartBeat(frame.headers);
 
-                                    results.push(typeof _this2.debug === 'function' ? _this2.connectCallback(frame) : void 0);
+                                    results.push(typeof _this2.connectCallback === 'function' ? _this2.connectCallback(frame) : void 0);
+
+                                    _this2.emit('connection', frame);
+
                                     break;
 
                                 case _FrameTypes2.default.MESSAGE:
                                     var subscription = frame.headers.subscription;
                                     var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
+
+                                    _this2.emit('message', frame);
 
                                     if (onreceive) {
                                         (function () {
@@ -382,6 +390,8 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
                                         errorCallback(frame);
                                     }
 
+                                    _this2.emit('error', frame);
+
                                     break;
 
                                 default:
@@ -408,6 +418,7 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
                 };
 
                 this.ws.onclose = function () {
+                    var isConnectFailed = _this2.connected ? false : true;
                     var msg = 'Whoops! Lost connection to ' + _this2.ws.url;
 
                     if (typeof _this2.debug === 'function') {
@@ -418,6 +429,12 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
 
                     if (typeof errorCallback === 'function') {
                         errorCallback(msg);
+                    }
+
+                    if (isConnectFailed) {
+                        _this2.emit('connection_failed');
+                    } else {
+                        _this2.emit('connection_error');
                     }
                 };
 
@@ -445,6 +462,8 @@ define(['exports', './Byte', './Frame', './Stomp', './FrameTypes'], function (ex
                 if (typeof disconnectCallback === 'function') {
                     disconnectCallback();
                 }
+
+                this.emit('disconnect');
             }
         }, {
             key: '_cleanUp',

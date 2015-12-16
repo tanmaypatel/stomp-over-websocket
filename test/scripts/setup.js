@@ -8,7 +8,8 @@ requirejs.config({
 		'mocha' : '../bower_components/mocha/mocha',
 		'chai' : '../bower_components/chai/chai',
 		'sinon' : '../bower_components/sinon/lib/sinon',
-		'sinon-chai' : '../bower_components/sinon-chai/lib/sinon-chai'
+		'sinon-chai' : '../bower_components/sinon-chai/lib/sinon-chai',
+		'minivents' : '../bower_components/minivents/dist/minivents.amd'
 	},
 
 	packages: [{
@@ -59,6 +60,7 @@ require([
 		'specs/unit/transaction.spec',
 		'specs/unit/subscription.spec',
 		'specs/unit/ack.spec',
+		'specs/unit/events.spec'
 	], function()
 	{
 		mocha.run();
