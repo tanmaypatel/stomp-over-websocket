@@ -9,21 +9,29 @@ define([
     {
         this.timeout(5000);
 
+        var client;
+
+        beforeEach(function()
+        {
+            client = Stomp.client(TEST.url);
+            client.debug = TEST.debug;
+        });
+
+        afterEach(function()
+        {
+            client.disconnect();
+        });
+
     	it('Send and receive a message', function(done)
         {
             var body = Math.random() + '';
 
-            var client = Stomp.client(TEST.url);
-            client.debug = TEST.debug;
             client.connect(TEST.login, TEST.password, function()
             {
                 client.subscribe(TEST.destination, function(message)
                 {
                     expect(message.body).to.equal(body);
-                    client.disconnect(function()
-                    {
-                        done();
-                    });
+                    done();
                 });
 
                 client.send(TEST.destination, {}, body);
@@ -32,15 +40,12 @@ define([
 
         it('Send and receive a message with a JSON body', function(done)
         {
-            var client = Stomp.client(TEST.url);
             var payload = {
                 text: 'hello',
                 bool: true,
                 value: Math.random()
             };
 
-            var client = Stomp.client(TEST.url);
-            client.debug = TEST.debug;
             client.connect(TEST.login, TEST.password, function()
             {
                 client.subscribe(TEST.destination, function(message)
@@ -49,10 +54,7 @@ define([
                     expect(res.text).to.equal(payload.text);
                     expect(res.bool).to.equal(payload.bool);
                     expect(res.value).to.equal(payload.value);
-                    client.disconnect(function()
-                    {
-                        done();
-                    });
+                    done();
                 });
 
                 client.send(TEST.destination, {}, JSON.stringify(payload));

@@ -9,13 +9,23 @@ define([
     {
         this.timeout(5000);
 
+        var client;
+
+        beforeEach(function()
+        {
+            client = Stomp.client(TEST.url);
+            client.debug = TEST.debug;
+        });
+
+        afterEach(function()
+        {
+            client.disconnect();
+        });
+
     	it('Send a message in a transaction and abort', function(done)
         {
             var body = Math.random() + '';
             var body2 = Math.random() + '';
-
-            var client = Stomp.client(TEST.url);
-            client.debug = TEST.debug;
 
             client.connect(TEST.login, TEST.password, function()
             {
@@ -23,10 +33,7 @@ define([
                 {
                     // we should receive the 2nd message outside the transaction
                     expect(message.body).to.equal(body2);
-                    client.disconnect(function()
-                    {
-                        done();
-                    });
+                    done();
                 });
 
                 var tx = client.begin('txid_' + Math.random());
@@ -43,19 +50,13 @@ define([
         {
             var body = Math.random() + '';
 
-            var client = Stomp.client(TEST.url);
-            client.debug = TEST.debug;
-
             client.connect(TEST.login, TEST.password, function()
             {
                 client.subscribe(TEST.destination, function(message)
                 {
                     // we should receive the 2nd message outside the transaction
                     expect(message.body).to.equal(body);
-                    client.disconnect(function()
-                    {
-                        done();
-                    });
+                    done();
                 });
 
                 var tx = client.begin('txid_' + Math.random());
@@ -70,19 +71,13 @@ define([
         {
             var body = Math.random() + '';
 
-            var client = Stomp.client(TEST.url);
-            client.debug = TEST.debug;
-
             client.connect(TEST.login, TEST.password, function()
             {
                 client.subscribe(TEST.destination, function(message)
                 {
                     // we should receive the 2nd message outside the transaction
                     expect(message.body).to.equal(body);
-                    client.disconnect(function()
-                    {
-                        done();
-                    });
+                    done();
                 });
 
                 var tx = client.begin();
