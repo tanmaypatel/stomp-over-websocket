@@ -1,4 +1,5 @@
 import Byte from './Byte';
+import Utils from './Utils';
 
 let unmarshallSingle = (data) =>
 {
@@ -7,15 +8,10 @@ let unmarshallSingle = (data) =>
     let command = headerLines.shift();
     let headers = {};
 
-    let trim = function(str)
-    {
-        return str.replace(/^\s+|\s+$/g, '');
-    };
-
     for(let line of headerLines.reverse())
     {
         let idx = line.indexOf(':');
-        headers[trim(line.substring(0, idx))] = trim(line.substring(idx + 1));
+        headers[Utils.trim(line.substring(0, idx))] = Utils.trim(line.substring(idx + 1));
     }
 
     let body = '';

@@ -1,6 +1,6 @@
 'use strict';
 
-define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'], function (exports, _minivents, _Byte, _Frame, _Stomp, _FrameTypes) {
+define(['exports', 'minivents', './Byte', './Frame', './Versions', './FrameTypes', './Utils'], function (exports, _minivents, _Byte, _Frame, _Versions, _FrameTypes, _Utils) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -11,9 +11,11 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
 
     var _Frame2 = _interopRequireDefault(_Frame);
 
-    var _Stomp2 = _interopRequireDefault(_Stomp);
+    var _Versions2 = _interopRequireDefault(_Versions);
 
     var _FrameTypes2 = _interopRequireDefault(_FrameTypes);
+
+    var _Utils2 = _interopRequireDefault(_Utils);
 
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : {
@@ -83,19 +85,14 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
         };
     })();
 
-    var now = function now() {
-        if (Date.now) {
-            return Date.now();
-        } else {
-            return new Date().valueOf;
-        }
-    };
-
     var Client = (function () {
-        function Client(ws) {
+        function Client(url) {
+            var WebSocketClass = arguments.length <= 1 || arguments[1] === undefined ? WebSocket : arguments[1];
+            var protocols = arguments.length <= 2 || arguments[2] === undefined ? ['v10.stomp', 'v11.stomp'] : arguments[2];
+
             _classCallCheck(this, Client);
 
-            this.ws = ws;
+            this.ws = new WebSocketClass(url, protocols);
             this.ws.binaryType = 'arraybuffer';
             this.counter = 0;
             this.connected = false;
@@ -141,7 +138,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
             value: function _setupHeartBeat(headers) {
                 var _this = this;
 
-                if ([_Stomp2.default.VERSIONS.V1_1, _Stomp2.default.VERSIONS.V1_2].indexOf(headers.version) >= 0) {
+                if ([_Versions2.default.V1_1, _Versions2.default.V1_2].indexOf(headers.version) >= 0) {
                     return;
                 }
 
@@ -165,7 +162,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
                         this.debug('send PING every ' + ttl + 'ms');
                     }
 
-                    this.pinger = _Stomp2.default.setInterval(ttl, function () {
+                    this.pinger = _Utils2.default.repeatEvery(ttl, function () {
                         _this.ws.send(_Byte2.default.LF);
 
                         if (typeof _this.debug === 'function') {
@@ -181,8 +178,8 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
                         this.debug('check PONG every ' + ttl + 'ms');
                     }
 
-                    this.ponger = _Stomp2.default.setInterval(ttl, function () {
-                        var delta = now() - _this.serverActivity;
+                    this.ponger = _Utils2.default.repeatEvery(ttl, function () {
+                        var delta = _Utils2.default.now() - _this.serverActivity;
 
                         if (delta > ttl * 2) {
                             if (typeof _this.debug === 'function') {
@@ -308,7 +305,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
                         data = event.data;
                     }
 
-                    _this2.serverActivity = now();
+                    _this2.serverActivity = _Utils2.default.now();
 
                     if (data == _Byte2.default.LF) {
                         if (typeof _this2.debug === 'function') {
@@ -443,7 +440,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
                         _this2.debug('Web Socket Opened...');
                     }
 
-                    headers['accept-version'] = _Stomp2.default.VERSIONS.supportedVersions();
+                    headers['accept-version'] = _Versions2.default.supportedVersions();
                     headers['heart-beat'] = [_this2.heartbeat.outgoing, _this2.heartbeat.incoming].join(',');
 
                     _this2._transmit(_FrameTypes2.default.CONNECT, headers);
@@ -471,11 +468,11 @@ define(['exports', 'minivents', './Byte', './Frame', './Stomp', './FrameTypes'],
                 this.connected = false;
 
                 if (this.pinger) {
-                    _Stomp2.default.clearInterval(this.pinger);
+                    _Utils2.default.stopRepeatation(this.pinger);
                 }
 
                 if (this.ponger) {
-                    _Stomp2.default.clearInterval(this.ponger);
+                    _Utils2.default.stopRepeatation(this.ponger);
                 }
             }
         }, {

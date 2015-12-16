@@ -13,7 +13,7 @@ define([
 
             it('connection_failed event gets fired in case of failed connection', function(done)
             {
-                var invalidClient = Stomp.client(TEST.badUrl);
+                var invalidClient = new Stomp.Client(TEST.badUrl);
                 invalidClient.debug = TEST.debug;
 
                 invalidClient.on('connection_failed', function(frame)
@@ -28,7 +28,7 @@ define([
 
             it('connection event gets fired in case of successful connection', function(done)
             {
-                var client = Stomp.client(TEST.url);
+                var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
                 client.on('connection', function(frame)
@@ -44,7 +44,7 @@ define([
 
             it('disconnect event gets fired in case of calling disconnect method', function(done)
             {
-                var client = Stomp.client(TEST.url);
+                var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
                 client.on('connection', function(frame)
@@ -64,7 +64,7 @@ define([
 
             it.skip('connection_error event gets fired in case of disconnection after a connection is done', function(done)
             {
-                var client = Stomp.client(TEST.url);
+                var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
                 client.on('connection', function(frame)
@@ -95,14 +95,14 @@ define([
                     value: Math.random()
                 };
 
-                var client = Stomp.client(TEST.url);
+                var client = new Stomp.Client(TEST.url);
                 client.debug = TEST.debug;
 
                 client.on('connection', function(frame)
                 {
                     client.on('message', function(frame)
                     {
-                        var res = JSON.parse(message.body);
+                        var res = JSON.parse(frame.body);
                         expect(res.text).to.equal(payload.text);
                         expect(res.bool).to.equal(payload.bool);
                         expect(res.value).to.equal(payload.value);

@@ -25,7 +25,7 @@ define([
               // called back if the client can not connect to STOMP broker
             };
 
-            client = Stomp.client(TEST.url);
+            client = new Stomp.Client(TEST.url);
 
             checkArgs = function(args, expectedHeaders, expectedConnectCallback, expectedErrorCallback)
             {

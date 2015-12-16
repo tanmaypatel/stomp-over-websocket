@@ -13,7 +13,7 @@ define([
 
         beforeEach(function()
         {
-            client = Stomp.client(TEST.url);
+            client = new Stomp.Client(TEST.url);
             client.debug = TEST.debug;
         });
 

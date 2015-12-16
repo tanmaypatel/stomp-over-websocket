@@ -11,7 +11,7 @@ define([
 
     	it('Connect to an invalid Stomp server', function(done)
         {
-            var client = Stomp.client(TEST.badUrl);
+            var client = new Stomp.Client(TEST.badUrl);
             client.connect('foo', 'bar', function()
             {
             }, function()
@@ -22,7 +22,7 @@ define([
 
         it('Connect to a valid Stomp server', function(done)
         {
-            var client = Stomp.client(TEST.url);
+            var client = new Stomp.Client(TEST.url);
             client.connect(TEST.login, TEST.password, function()
             {
                 done();
@@ -31,7 +31,7 @@ define([
 
         it('Disconnect', function(done)
         {
-            var client = Stomp.client(TEST.url);
+            var client = new Stomp.Client(TEST.url);
             client.connect(TEST.login, TEST.password, function()
             {
                 // once connected, we disconnect

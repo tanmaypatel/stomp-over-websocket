@@ -1,11 +1,13 @@
 'use strict';
 
-define(['exports', './Byte'], function (exports, _Byte) {
+define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
 
     var _Byte2 = _interopRequireDefault(_Byte);
+
+    var _Utils2 = _interopRequireDefault(_Utils);
 
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : {
@@ -42,11 +44,6 @@ define(['exports', './Byte'], function (exports, _Byte) {
         var headerLines = data.substring(0, divider).split(_Byte2.default.LF);
         var command = headerLines.shift();
         var headers = {};
-
-        var trim = function trim(str) {
-            return str.replace(/^\s+|\s+$/g, '');
-        };
-
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -55,7 +52,7 @@ define(['exports', './Byte'], function (exports, _Byte) {
             for (var _iterator = headerLines.reverse()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var line = _step.value;
                 var idx = line.indexOf(':');
-                headers[trim(line.substring(0, idx))] = trim(line.substring(idx + 1));
+                headers[_Utils2.default.trim(line.substring(0, idx))] = _Utils2.default.trim(line.substring(idx + 1));
             }
         } catch (err) {
             _didIteratorError = true;

@@ -2,26 +2,15 @@ import Events from 'minivents';
 
 import Byte from './Byte';
 import Frame from './Frame';
-import Stomp from './Stomp';
+import Versions from './Versions';
 import FrameTypes from './FrameTypes';
-
-let now = ()=>
-{
-    if(Date.now)
-    {
-        return Date.now();
-    }
-    else
-    {
-        return new Date().valueOf;
-    }
-}
+import Utils from './Utils';
 
 class Client
 {
-    constructor(ws)
+    constructor(url, WebSocketClass = WebSocket, protocols = ['v10.stomp', 'v11.stomp'])
     {
-        this.ws = ws;
+        this.ws = new WebSocketClass(url, protocols);
         this.ws.binaryType = 'arraybuffer';
 
         this.counter = 0;
@@ -74,7 +63,7 @@ class Client
 
     _setupHeartBeat(headers)
     {
-        if([Stomp.VERSIONS.V1_1, Stomp.VERSIONS.V1_2].indexOf(headers.version) >= 0)
+        if([Versions.V1_1, Versions.V1_2].indexOf(headers.version) >= 0)
         {
             return;
         }
@@ -95,7 +84,7 @@ class Client
                 this.debug(`send PING every ${ttl}ms`);
             }
 
-            this.pinger = Stomp.setInterval(ttl, () =>
+            this.pinger = Utils.repeatEvery(ttl, () =>
             {
                 this.ws.send(Byte.LF);
 
@@ -115,9 +104,9 @@ class Client
                 this.debug(`check PONG every ${ttl}ms`);
             }
 
-            this.ponger = Stomp.setInterval(ttl, () =>
+            this.ponger = Utils.repeatEvery(ttl, () =>
             {
-                let delta = now() - this.serverActivity;
+                let delta = Utils.now() - this.serverActivity;
 
                 if(delta > ttl * 2)
                 {
@@ -204,7 +193,7 @@ class Client
                 data = event.data;
             }
 
-            this.serverActivity = now();
+            this.serverActivity = Utils.now();
 
             if(data == Byte.LF)
             {
@@ -335,7 +324,7 @@ class Client
                  this.debug(`Web Socket Opened...`);
              }
 
-             headers['accept-version'] = Stomp.VERSIONS.supportedVersions();
+             headers['accept-version'] = Versions.supportedVersions();
              headers['heart-beat'] = [this.heartbeat.outgoing, this.heartbeat.incoming].join(',');
 
              this._transmit(FrameTypes.CONNECT, headers);
@@ -364,12 +353,12 @@ class Client
 
         if(this.pinger)
         {
-            Stomp.clearInterval(this.pinger);
+            Utils.stopRepeatation(this.pinger);
         }
 
         if(this.ponger)
         {
-            Stomp.clearInterval(this.ponger);
+            Utils.stopRepeatation(this.ponger);
         }
     }
 
