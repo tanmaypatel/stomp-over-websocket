@@ -330,7 +330,7 @@ class Client
     {
         if(!headers.id)
         {
-            headers.id = 'sub-' + this.counter++;
+            headers.id = 'subscription-' + Utils.generateUUID();
         }
 
         headers.destination = destination;
@@ -361,7 +361,7 @@ class Client
 
     begin(transaction)
     {
-        let txid = transaction || 'tx' + this.counter++;
+        let txid = transaction || 'tx-' + Utils.generateUUID();
 
         this._transmit(Commands.BEGIN, {
             transaction: txid
