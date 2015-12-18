@@ -421,7 +421,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
                 if (!headers.id) {
-                    headers.id = 'sub-' + this.counter++;
+                    headers.id = 'subscription-' + _Utils2.default.generateUUID();
                 }
 
                 headers.destination = destination;
@@ -449,7 +449,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
         }, {
             key: 'begin',
             value: function begin(transaction) {
-                var txid = transaction || 'tx' + this.counter++;
+                var txid = transaction || 'tx-' + _Utils2.default.generateUUID();
 
                 this._transmit(_Commands2.default.BEGIN, {
                     transaction: txid
