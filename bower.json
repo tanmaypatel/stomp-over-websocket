@@ -24,7 +24,8 @@
     "requirejs": "~2.1.22",
     "chai": "~3.4.2",
     "sinon": "~1.17.2",
-    "sinon-chai": "~2.8.0"
+    "sinon-chai": "~2.8.0",
+    "sockjs-client": "~1.0.3"
   },
   "dependencies": {
     "minivents": "~2.0.0"

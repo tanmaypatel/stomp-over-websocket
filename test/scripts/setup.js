@@ -9,7 +9,8 @@ requirejs.config({
 		'chai' : '../bower_components/chai/chai',
 		'sinon' : '../bower_components/sinon/lib/sinon',
 		'sinon-chai' : '../bower_components/sinon-chai/lib/sinon-chai',
-		'minivents' : '../bower_components/minivents/dist/minivents.amd'
+		'minivents' : '../bower_components/minivents/dist/minivents.amd',
+		'sockjs' : '../bower_components/sockjs-client/dist/sockjs-1.0.3.min'
 	},
 
 	packages: [{
@@ -30,6 +31,10 @@ requirejs.config({
 
 		'sinon': {
 			exports: 'sinon'
+		},
+
+		'sockjs': {
+			exports: 'SockJS'
 		}
 	}
 
@@ -59,7 +64,8 @@ require([
 		'specs/unit/subscription.spec',
 		'specs/unit/message.spec',
 		'specs/unit/transaction.spec',
-		'specs/unit/ack.spec'
+		'specs/unit/ack.spec',
+		'specs/unit/sockjs.spec'
 	], function()
 	{
 		mocha.run();

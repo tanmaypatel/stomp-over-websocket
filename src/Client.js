@@ -8,12 +8,11 @@ import Utils from './Utils';
 
 class Client
 {
-    constructor(url, WebSocketClass = WebSocket, protocols = ['v10.stomp', 'v11.stomp'])
+    constructor(url, WebSocketClass = WebSocket, options = {}, protocols = ['v10.stomp', 'v11.stomp'])
     {
-        this.ws = new WebSocketClass(url, protocols);
+        this.ws = new WebSocketClass(url, protocols, options);
         this.ws.binaryType = 'arraybuffer';
 
-        this.counter = 0;
         this.connected = false;
         this.heartbeat = {
             outgoing: 10000,

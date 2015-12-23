@@ -5,6 +5,7 @@ define([], function()
         login : 'admin',
         password : 'password',
         url : 'ws://localhost:61623',
+        httpurl : 'http://localhost:61623',
         badUrl: 'ws://localhost:61625',
         timeout: 1800,
         debug : function(str)
