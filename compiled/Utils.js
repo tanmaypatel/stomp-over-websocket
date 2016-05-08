@@ -1,4 +1,16 @@
-define(['exports'], function (exports) {
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['exports'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(exports);
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(mod.exports);
+        global.Utils = mod.exports;
+    }
+})(this, function (exports) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
@@ -47,6 +59,6 @@ define(['exports'], function (exports) {
         return uuid;
     };
 
-    exports.default = { noop: noop, now: now, trim: trim, repeatEvery: repeatEvery, stopRepeatation: stopRepeatation };
+    exports.default = { noop: noop, now: now, trim: trim, repeatEvery: repeatEvery, stopRepeatation: stopRepeatation, generateUUID: generateUUID };
 });
 //# sourceMappingURL=Utils.js.map

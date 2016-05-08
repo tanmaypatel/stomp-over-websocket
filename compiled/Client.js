@@ -1,4 +1,16 @@
-define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands', './Utils'], function (exports, _minivents, _Byte, _Frame, _Versions, _Commands, _Utils) {
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands', './Utils'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(exports, require('minivents'), require('./Byte'), require('./Frame'), require('./Versions'), require('./Commands'), require('./Utils'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(mod.exports, global.minivents, global.Byte, global.Frame, global.Versions, global.Commands, global.Utils);
+        global.Client = mod.exports;
+    }
+})(this, function (exports, _minivents, _Byte, _Frame, _Versions, _Commands, _Utils) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {

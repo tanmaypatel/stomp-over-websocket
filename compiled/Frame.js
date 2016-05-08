@@ -1,4 +1,16 @@
-define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['exports', './Byte', './Utils'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(exports, require('./Byte'), require('./Utils'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(mod.exports, global.Byte, global.Utils);
+        global.Frame = mod.exports;
+    }
+})(this, function (exports, _Byte, _Utils) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {

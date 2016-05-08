@@ -52,4 +52,4 @@ let generateUUID = function()
     return uuid;
 }
 
-export default {noop, now, trim, repeatEvery, stopRepeatation};
+export default {noop, now, trim, repeatEvery, stopRepeatation, generateUUID};

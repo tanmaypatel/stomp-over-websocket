@@ -1,4 +1,16 @@
-define(['exports', './Client', './Frame'], function (exports, _Client, _Frame) {
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['exports', './Client', './Frame'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(exports, require('./Client'), require('./Frame'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(mod.exports, global.Client, global.Frame);
+        global.Versions = mod.exports;
+    }
+})(this, function (exports, _Client, _Frame) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {

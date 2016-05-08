@@ -1,4 +1,16 @@
-define(['exports', './Frame', './Client', './Commands', './Versions'], function (exports, _Frame, _Client, _Commands, _Versions) {
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(['exports', './Frame', './Client', './Commands', './Versions'], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require('./Frame'), require('./Client'), require('./Commands'), require('./Versions'));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.Frame, global.Client, global.Commands, global.Versions);
+    global.index = mod.exports;
+  }
+})(this, function (exports, _Frame, _Client, _Commands, _Versions) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
