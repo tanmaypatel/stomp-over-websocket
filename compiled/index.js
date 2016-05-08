@@ -1,6 +1,6 @@
-'use strict';
-
 define(['exports', './Frame', './Client', './Commands', './Versions'], function (exports, _Frame, _Client, _Commands, _Versions) {
+  'use strict';
+
   Object.defineProperty(exports, "__esModule", {
     value: true
   });

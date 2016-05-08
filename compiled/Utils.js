@@ -1,10 +1,9 @@
-'use strict';
-
 define(['exports'], function (exports) {
+    'use strict';
+
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-
     var noop = function noop() {};
 
     var now = function now() {
@@ -23,11 +22,11 @@ define(['exports'], function (exports) {
     var stopRepeatation = noop;
 
     if (typeof window !== 'undefined' && window !== null) {
-        repeatEvery = function (interval, func) {
+        repeatEvery = function repeatEvery(interval, func) {
             return window.setInterval(func, interval);
         };
 
-        stopRepeatation = function (id) {
+        stopRepeatation = function stopRepeatation(id) {
             return window.clearInterval(id);
         };
     }
@@ -36,7 +35,7 @@ define(['exports'], function (exports) {
         var d = now();
 
         if (window.performance && typeof window.performance.now === "function") {
-            d += performance.now();
+            d += performance.now(); //use high-precision timer if available
         }
 
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -44,6 +43,7 @@ define(['exports'], function (exports) {
             d = Math.floor(d / 16);
             return (c == 'x' ? r : r & 0x3 | 0x8).toString(16);
         });
+
         return uuid;
     };
 

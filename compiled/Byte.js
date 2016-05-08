@@ -1,6 +1,6 @@
-'use strict';
-
 define(['exports'], function (exports) {
+    'use strict';
+
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -8,6 +8,7 @@ define(['exports'], function (exports) {
         LF: '\x0A',
         NULL: '\x00'
     };
+
     exports.default = Byte;
 });
 //# sourceMappingURL=Byte.js.map

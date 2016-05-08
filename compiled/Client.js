@@ -1,6 +1,6 @@
-'use strict';
-
 define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands', './Utils'], function (exports, _minivents, _Byte, _Frame, _Versions, _Commands, _Utils) {
+    'use strict';
+
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -23,7 +23,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
         };
     }
 
-    var _slicedToArray = (function () {
+    var _slicedToArray = function () {
         function sliceIterator(arr, i) {
             var _arr = [];
             var _n = true;
@@ -59,7 +59,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 throw new TypeError("Invalid attempt to destructure non-iterable instance");
             }
         };
-    })();
+    }();
 
     function _classCallCheck(instance, Constructor) {
         if (!(instance instanceof Constructor)) {
@@ -67,7 +67,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
         }
     }
 
-    var _createClass = (function () {
+    var _createClass = function () {
         function defineProperties(target, props) {
             for (var i = 0; i < props.length; i++) {
                 var descriptor = props[i];
@@ -83,18 +83,19 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
             if (staticProps) defineProperties(Constructor, staticProps);
             return Constructor;
         };
-    })();
+    }();
 
-    var Client = (function () {
+    var Client = function () {
         function Client(url) {
             var WebSocketClass = arguments.length <= 1 || arguments[1] === undefined ? WebSocket : arguments[1];
-            var protocols = arguments.length <= 2 || arguments[2] === undefined ? ['v10.stomp', 'v11.stomp'] : arguments[2];
+            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+            var protocols = arguments.length <= 3 || arguments[3] === undefined ? ['v10.stomp', 'v11.stomp'] : arguments[3];
 
             _classCallCheck(this, Client);
 
-            this.ws = new WebSocketClass(url, protocols);
+            this.ws = new WebSocketClass(url, protocols, options);
             this.ws.binaryType = 'arraybuffer';
-            this.counter = 0;
+
             this.connected = false;
             this.heartbeat = {
                 outgoing: 10000,
@@ -103,6 +104,8 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
             this.maxWebSocketFrameSize = 16 * 1024;
             this.subscriptions = {};
             this.partialData = '';
+
+            // applying events mixins to support event handlers
             (0, _minivents2.default)(this);
         }
 
@@ -123,6 +126,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 while (true) {
                     if (out.length > this.maxWebSocketFrameSize) {
                         this.ws.send(out.substring(0, this.maxWebSocketFrameSize));
+
                         out = out.substring(this.maxWebSocketFrameSize);
 
                         if (typeof this.debug === 'function') {
@@ -142,8 +146,8 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                     return;
                 }
 
-                var serverOutgoing = undefined,
-                    serverIncoming = undefined;
+                var serverOutgoing = void 0,
+                    serverIncoming = void 0;
 
                 var _headers$heartBeat$s = headers['heart-beat'].split(',').map(function (v) {
                     return parseInt(v);
@@ -153,8 +157,9 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
 
                 serverOutgoing = _headers$heartBeat$s2[0];
                 serverIncoming = _headers$heartBeat$s2[1];
-                var ttl = undefined;
 
+
+                var ttl = void 0;
                 if (this.heartbeat.outgoing == 0 || serverIncoming == 0) {
                     ttl = Math.max(this.heartbeat.outgoing, serverIncoming);
 
@@ -212,8 +217,8 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 };
 
                 this.ws.onmessage = function (evt) {
-                    var data = undefined,
-                        arr = undefined;
+                    var data = void 0,
+                        arr = void 0;
 
                     if (typeof ArrayBuffer != 'undefined' && evt.data instanceof ArrayBuffer) {
                         var _arr = new Uint8Array(evt.data);
@@ -223,6 +228,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                         }
 
                         var _results = [];
+
                         var _iteratorNormalCompletion = true;
                         var _didIteratorError = false;
                         var _iteratorError = undefined;
@@ -285,7 +291,6 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                                     }
 
                                     _this2.connected = true;
-
                                     _this2._setupHeartBeat(frame.headers);
 
                                     _this2.emit('connection', frame);
@@ -294,6 +299,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
 
                                 case _Commands2.default.MESSAGE:
                                     var subscription = frame.headers.subscription;
+
                                     var onreceive = _this2.subscriptions[subscription] || _this2.onreceive;
 
                                     _this2.emit('message', frame);
@@ -305,11 +311,13 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
 
                                             frame.ack = function () {
                                                 var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
                                                 return client.ack(messageID, subscription, headers);
                                             };
 
                                             frame.nack = function () {
                                                 var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
                                                 return client.nack(messageID, subscription, headers);
                                             };
 
@@ -320,24 +328,25 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                                             _this2.debug('Unhandled received MESSAGE: ' + frame);
                                         }
                                     }
-
                                     break;
 
                                 case _Commands2.default.RECEIPT:
+
                                     _this2.emit('receipt', frame);
 
                                     break;
 
                                 case _Commands2.default.ERROR:
+
                                     _this2.emit('error', frame);
 
                                     break;
 
                                 default:
+
                                     if (typeof _this2.debug === 'function') {
                                         _this2.debug('Unhandled frame: ' + frame);
                                     }
-
                             }
                         }
                     } catch (err) {
@@ -358,6 +367,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
 
                 this.ws.onclose = function (evt) {
                     var didConnectionFail = !evt.wasClean || !_this2.connected ? true : false;
+
                     var msg = 'Whoops! Lost connection to ' + _this2.ws.url;
 
                     if (typeof _this2.debug === 'function') {
@@ -391,7 +401,6 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 };
 
                 this.ws.close();
-
                 this._cleanUp();
             }
         }, {
@@ -412,6 +421,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
             value: function send(destination) {
                 var headers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
                 var body = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+
                 headers.destination = destination;
                 return this._transmit(_Commands2.default.SEND, headers, body);
             }
@@ -425,11 +435,13 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 }
 
                 headers.destination = destination;
+
                 this.subscriptions[headers.id] = callback;
 
                 this._transmit(_Commands2.default.SUBSCRIBE, headers);
 
                 var client = this;
+
                 return {
                     id: headers.id,
                     unsubscribe: function unsubscribe() {
@@ -456,6 +468,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
                 });
 
                 var client = this;
+
                 return {
                     id: txid,
                     commit: function commit() {
@@ -484,6 +497,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
             key: 'ack',
             value: function ack(messageID, subscription) {
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
                 return this._transmit(_Commands2.default.ACK, headers);
@@ -492,6 +506,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
             key: 'nack',
             value: function nack(messageID, subscription) {
                 var headers = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
                 headers['message-id'] = messageID;
                 headers.subscription = subscription;
                 return this._transmit(_Commands2.default.NACK, headers);
@@ -499,7 +514,7 @@ define(['exports', 'minivents', './Byte', './Frame', './Versions', './Commands',
         }]);
 
         return Client;
-    })();
+    }();
 
     exports.default = Client;
 });

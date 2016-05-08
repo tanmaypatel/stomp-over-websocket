@@ -1,6 +1,6 @@
-'use strict';
-
 define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
+    'use strict';
+
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -21,7 +21,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
         }
     }
 
-    var _createClass = (function () {
+    var _createClass = function () {
         function defineProperties(target, props) {
             for (var i = 0; i < props.length; i++) {
                 var descriptor = props[i];
@@ -37,13 +37,14 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
             if (staticProps) defineProperties(Constructor, staticProps);
             return Constructor;
         };
-    })();
+    }();
 
     var unmarshallSingle = function unmarshallSingle(data) {
         var divider = data.search(new RegExp('' + _Byte2.default.LF + _Byte2.default.LF));
         var headerLines = data.substring(0, divider).split(_Byte2.default.LF);
         var command = headerLines.shift();
         var headers = {};
+
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -51,6 +52,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
         try {
             for (var _iterator = headerLines.reverse()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var line = _step.value;
+
                 var idx = line.indexOf(':');
                 headers[_Utils2.default.trim(line.substring(0, idx))] = _Utils2.default.trim(line.substring(idx + 1));
             }
@@ -70,6 +72,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
         }
 
         var body = '';
+
         var start = divider + 2;
 
         if (headers['content-length']) {
@@ -80,7 +83,6 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
 
             for (var i = start; i <= data.length; i++) {
                 chr = data.charAt(i);
-
                 if (chr === _Byte2.default.NULL) {
                     break;
                 }
@@ -92,7 +94,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
         return new Frame(command, headers, body);
     };
 
-    var Frame = (function () {
+    var Frame = function () {
         _createClass(Frame, null, [{
             key: 'sizeOfUTF8',
             value: function sizeOfUTF8(s) {
@@ -106,6 +108,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
             key: 'unmarshall',
             value: function unmarshall(datas) {
                 var frames = [];
+
                 var _iteratorNormalCompletion2 = true;
                 var _didIteratorError2 = false;
                 var _iteratorError2 = undefined;
@@ -139,6 +142,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
             key: 'marshall',
             value: function marshall(command, headers, body) {
                 var frame = new Frame(command, headers, body);
+
                 return frame.toString() + _Byte2.default.NULL;
             }
         }]);
@@ -158,6 +162,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
             key: 'toString',
             value: function toString() {
                 var lines = [this.command];
+
                 var skipContentLength = this.headers['content-length'] === false ? true : false;
 
                 if (skipContentLength) {
@@ -171,6 +176,7 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
                 try {
                     for (var _iterator3 = Object.keys(this.headers)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                         var key = _step3.value;
+
                         var value = this.headers[key];
                         lines.push(key + ':' + value);
                     }
@@ -194,12 +200,13 @@ define(['exports', './Byte', './Utils'], function (exports, _Byte, _Utils) {
                 }
 
                 lines.push(_Byte2.default.LF + this.body);
+
                 return lines.join(_Byte2.default.LF);
             }
         }]);
 
         return Frame;
-    })();
+    }();
 
     exports.default = Frame;
 });

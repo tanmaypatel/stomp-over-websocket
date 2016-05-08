@@ -1,6 +1,6 @@
-'use strict';
-
 define(['exports', './Client', './Frame'], function (exports, _Client, _Frame) {
+    'use strict';
+
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
@@ -23,6 +23,7 @@ define(['exports', './Client', './Frame'], function (exports, _Client, _Frame) {
             return '1.1,1.0';
         }
     };
+
     exports.default = Versions;
 });
 //# sourceMappingURL=Versions.js.map
