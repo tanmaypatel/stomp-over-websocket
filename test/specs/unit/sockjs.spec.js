@@ -14,7 +14,7 @@ define([
 
             it('Connect to a valid Stomp server', function(done)
             {
-                var client = new Stomp.Client(TEST.url, SockJS, {
+                var client = new Stomp.Client(TEST.httpurl, SockJS, {
                     transports: ['websocket ']
                 });
 
@@ -33,7 +33,7 @@ define([
 
             it('Disconnect', function(done)
             {
-                var client = new Stomp.Client(TEST.url, SockJS, {
+                var client = new Stomp.Client(TEST.httpurl, SockJS, {
                     transports: ['websocket ']
                 });
 

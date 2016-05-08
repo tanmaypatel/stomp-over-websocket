@@ -10,7 +10,8 @@ class Client
 {
     constructor(url, WebSocketClass = WebSocket, options = {}, protocols = ['v10.stomp', 'v11.stomp'])
     {
-        this.ws = new WebSocketClass(url, protocols, options);
+        // this.ws = new WebSocketClass(url, protocols, options);
+        this.ws = new WebSocketClass(url);
         this.ws.binaryType = 'arraybuffer';
 
         this.connected = false;

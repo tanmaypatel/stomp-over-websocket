@@ -2,11 +2,11 @@ define([], function()
 {
     var TEST = {
         destination : '/topic/chat.general',
-        login : 'admin',
-        password : 'password',
-        url : 'ws://localhost:61623',
-        httpurl : 'http://localhost:61623',
-        badUrl: 'ws://localhost:61625',
+        login : 'guest',
+        password : 'guest',
+        url : 'ws://localhost:15674/ws',
+        httpurl : 'http://localhost:15674/stomp',
+        badUrl: 'ws://localhost:15675/ws',
         timeout: 1800,
         debug : function(str)
         {

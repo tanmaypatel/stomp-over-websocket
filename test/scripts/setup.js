@@ -10,7 +10,7 @@ requirejs.config({
 		'sinon' : '../bower_components/sinon/lib/sinon',
 		'sinon-chai' : '../bower_components/sinon-chai/lib/sinon-chai',
 		'minivents' : '../bower_components/minivents/dist/minivents.amd',
-		'sockjs' : '../bower_components/sockjs-client/dist/sockjs-1.0.3.min'
+		'sockjs' : '../bower_components/sockjs-client/dist/sockjs-1.1.0.min'
 	},
 
 	packages: [{
