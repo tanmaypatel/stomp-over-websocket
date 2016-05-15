@@ -105,8 +105,7 @@
 
             _classCallCheck(this, Client);
 
-            // this.ws = new WebSocketClass(url, protocols, options);
-            this.ws = new WebSocketClass(url);
+            this.ws = new WebSocketClass(url, protocols, options);
             this.ws.binaryType = 'arraybuffer';
 
             this.connected = false;
